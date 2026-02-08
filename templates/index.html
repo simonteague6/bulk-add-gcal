@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greetings!</title>
+</head>
+<body>
+<form action="/submit" method="POST" enctype="multipart/form-data">
+    <label for="bulk-text">Bulk Text</label>
+    <textarea id="bulk-text" name="bulk-text"></textarea>
+    
+    <label for="audio-upload">Audio Upload</label>
+    <input type="file" id="audio-upload" name="audio-upload" accept="audio/*">
+
+    <button type="submit">Submit</button>
+
+</form>
+</body>
+</html>
