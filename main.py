@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
@@ -34,4 +35,5 @@ def handle_submit():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5485)
+    debug_mode = os.getenv('FLASK_ENV') != 'production'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5485)

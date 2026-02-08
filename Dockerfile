@@ -15,6 +15,7 @@ COPY templates/ ./templates/
 # Set environment variables for Flask
 ENV FLASK_APP=main.py
 ENV FLASK_ENV=production
+ENV PYTHONUNBUFFERED=1
 
 # Run the Flask app
 CMD ["python", "main.py"]
