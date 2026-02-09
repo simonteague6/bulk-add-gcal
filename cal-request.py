@@ -53,7 +53,7 @@ def parse_args():
     This keeps CLI parsing separate from the API logic so the code is reusable.
     """
     parser = argparse.ArgumentParser(
-        description="Create a simple Google Calendar event on the primary calendar."
+        description="Create a Google Calendar event on the primary calendar."
     )
     parser.add_argument("--summary", default="Test Event", help="Event title")
     parser.add_argument("--location", default="", help="Event location")
@@ -74,7 +74,14 @@ def parse_args():
             "Defaults to start+1h."
         ),
     )
-    print(parser.parse_args())
+    parser.add_argument(
+        "--quick-add",
+        default="",
+        help=(
+            "Natural language event text (e.g. 'Coffee with Alex tomorrow at 2pm'). "
+            "If provided, uses the Calendar quickAdd endpoint instead of manual fields."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -96,34 +103,46 @@ def compute_times(start_arg: str, end_arg: str):
     else:
         end_dt = start_dt + dt.timedelta(hours=1)
 
-    print(f"startdt: {start_dt} enddt: {end_dt}")
     return start_dt, end_dt
+
+
+def create_event_manual(service, args):
+    """Create an event using explicit fields like summary, start, and end."""
+    start_dt, end_dt = compute_times(args.start, args.end)
+
+    # Event body sent to the API. This is a Python dict that becomes JSON.
+    event = {
+        "summary": args.summary,
+        "location": args.location,
+        "description": args.description,
+        "start": {"dateTime": start_dt.isoformat()},
+        "end": {"dateTime": end_dt.isoformat()},
+    }
+
+    return service.events().insert(calendarId="primary", body=event).execute()
+
+
+def create_event_quick_add(service, text: str):
+    """Create an event using Google's natural language parsing (quickAdd)."""
+    return (
+        service.events()
+        .quickAdd(calendarId="primary", text=text)
+        .execute()
+    )
 
 
 def main():
     """Create an event on the primary Google Calendar."""
     args = parse_args()
-    start_dt, end_dt = compute_times(args.start, args.end)
 
     try:
         # Build the Google Calendar API client.
         service = build("calendar", "v3", credentials=load_credentials())
 
-        # Event body sent to the API. This is a Python dict that becomes JSON.
-        event = {
-            "summary": args.summary,
-            "location": args.location,
-            "description": args.description,
-            "start": {"dateTime": start_dt.isoformat()},
-            "end": {"dateTime": end_dt.isoformat()},
-        }
-
-        # Insert the event into the primary calendar.
-        created = (
-            service.events()
-            .insert(calendarId="primary", body=event)
-            .execute()
-        )
+        if args.quick_add:
+            created = create_event_quick_add(service, args.quick_add)
+        else:
+            created = create_event_manual(service, args)
 
         print(f"Event created: {created.get('htmlLink')}")
     except HttpError as error:
