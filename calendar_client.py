@@ -45,82 +45,24 @@ def load_credentials():
     return creds
 
 
-def parse_args():
-    """Parse command-line arguments.
-
-    This keeps CLI parsing separate from the API logic so the code is reusable.
-    """
-    parser = argparse.ArgumentParser(
-        description="Create a Google Calendar event on the primary calendar."
-    )
-    parser.add_argument("--summary", default="Test Event", help="Event title")
-    parser.add_argument("--location", default="", help="Event location")
-    parser.add_argument("--description", default="", help="Event description")
-    parser.add_argument(
-        "--start",
-        default="",
-        help=(
-            "Start time ISO-8601 (e.g. 2026-02-10T10:00:00-05:00). Defaults to now+10m."
-        ),
-    )
-    parser.add_argument(
-        "--end",
-        default="",
-        help=(
-            "End time ISO-8601 (e.g. 2026-02-10T11:00:00-05:00). Defaults to start+1h."
-        ),
-    )
-    parser.add_argument(
-        "--quick-add",
-        default="",
-        help=(
-            "Natural language event text (e.g. 'Coffee with Alex tomorrow at 2pm'). "
-            "If provided, uses the Calendar quickAdd endpoint instead of manual fields."
-        ),
-    )
-    return parser.parse_args()
-
-
-def compute_times(start_arg: str, end_arg: str):
-    """Compute start/end datetimes.
-
-    - If start is provided, parse it.
-    - Otherwise default to now + 10 minutes.
-    - If end is provided, parse it.
-    - Otherwise default to start + 1 hour.
-    """
-    if start_arg:
-        start_dt = dt.datetime.fromisoformat(start_arg)
-    else:
-        start_dt = dt.datetime.now().astimezone() + dt.timedelta(minutes=10)
-
-    if end_arg:
-        end_dt = dt.datetime.fromisoformat(end_arg)
-    else:
-        end_dt = start_dt + dt.timedelta(hours=1)
-
-    return start_dt, end_dt
-
-
-def create_event_manual(service, args):
-    """Create an event using explicit fields like summary, start, and end."""
-    start_dt, end_dt = compute_times(args.start, args.end)
-
-    # Event body sent to the API. This is a Python dict that becomes JSON.
-    event = {
-        "summary": args.summary,
-        "location": args.location,
-        "description": args.description,
-        "start": {"dateTime": start_dt.isoformat()},
-        "end": {"dateTime": end_dt.isoformat()},
-    }
-
-    return service.events().insert(calendarId="primary", body=event).execute()
+def build_service():
+    service = build("calendar", "v3", credentials=load_credentials())
+    return service
 
 
 def create_event_quick_add(service, text: str):
     """Create an event using Google's natural language parsing (quickAdd)."""
     return service.events().quickAdd(calendarId="primary", text=text).execute()
+
+def create_many_quick_add_events(service, eventList: list):
+    """Create an event using Google's natural language parsing (quickAdd)."""
+    results = []
+    for event in eventList:
+        serviceOutput = service.events().quickAdd(calendarId="primary", text=event).execute()
+        results.append(serviceOutput)
+    return results
+
+
 
 
 def main():
@@ -133,8 +75,6 @@ def main():
 
         if args.quick_add:
             created = create_event_quick_add(service, args.quick_add)
-        else:
-            created = create_event_manual(service, args)
 
         print(f"Event created: {created.get('htmlLink')}")
     except HttpError as error:
