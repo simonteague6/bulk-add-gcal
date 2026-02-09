@@ -1,0 +1,10 @@
+services:
+  calendar-app:
+    build: .
+    ports:
+      - "5485:5485"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
