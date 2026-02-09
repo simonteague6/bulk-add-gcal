@@ -11,5 +11,7 @@ wheels/
 
 # Credentials
 token.json
-quickstart.py
 credentials.json
+
+quickstart.py
+GOOGLE_CALENDAR_API_GUIDE.md
