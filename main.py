@@ -22,8 +22,11 @@ def handle_submit():
         service = calendar_client.build_service()
         created = calendar_client.create_many_quick_add_events(service, lines)
         
-        #for event in created:
-            #print(f"Event created: {event.get('htmlLink', "didn't work")}")
+        
+        for event in created:
+            summary = event.get('summary', 'NO SUMMARY')
+            url = event.get('htmlLink', 'NO URL')
+            print(f"Title: {summary} URL: {url}")
 
     if audio_file:
         print(f"Audio file uploaded: {audio_file.filename}")

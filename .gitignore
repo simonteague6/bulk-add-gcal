@@ -13,5 +13,6 @@ wheels/
 token.json
 credentials.json
 
+# Random
 quickstart.py
-GOOGLE_CALENDAR_API_GUIDE.md
+AGENTS.md

@@ -61,26 +61,3 @@ def create_many_quick_add_events(service, eventList: list):
         serviceOutput = service.events().quickAdd(calendarId="primary", text=event).execute()
         results.append(serviceOutput)
     return results
-
-
-
-
-def main():
-    """Create an event on the primary Google Calendar."""
-    args = parse_args()
-
-    try:
-        # Build the Google Calendar API client.
-        service = build("calendar", "v3", credentials=load_credentials())
-
-        if args.quick_add:
-            created = create_event_quick_add(service, args.quick_add)
-
-        print(f"Event created: {created.get('htmlLink')}")
-    except HttpError as error:
-        # HttpError covers API errors like invalid auth or bad request body.
-        print(f"An error occurred: {error}")
-
-
-if __name__ == "__main__":
-    main()
