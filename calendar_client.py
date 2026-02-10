@@ -54,10 +54,13 @@ def create_event_quick_add(service, text: str):
     """Create an event using Google's natural language parsing (quickAdd)."""
     return service.events().quickAdd(calendarId="primary", text=text).execute()
 
+
 def create_many_quick_add_events(service, eventList: list):
     """Create an event using Google's natural language parsing (quickAdd)."""
     results = []
     for event in eventList:
-        serviceOutput = service.events().quickAdd(calendarId="primary", text=event).execute()
+        serviceOutput = (
+            service.events().quickAdd(calendarId="primary", text=event).execute()
+        )
         results.append(serviceOutput)
     return results

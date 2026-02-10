@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greetings!</title>
+    <title>BulkAdd Calendar Events</title>
 </head>
 <body>
 <form action="/submit" method="POST" enctype="multipart/form-data">
@@ -16,5 +16,15 @@
     <button type="submit">Submit</button>
 
 </form>
+{% if events %}
+<h2>Previously Scheduled Events</h2>
+{% endif %}
+<ul>
+    {% for event in events %}
+        <li>
+            <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a>
+        </li>
+    {% endfor %}
+</ul>
 </body>
 </html>
