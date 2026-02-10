@@ -9,7 +9,7 @@ COPY pyproject.toml uv.lock* ./
 RUN pip install --no-cache-dir -e .
 
 # Copy application files (add more in the future as needed)
-COPY main.py ./
+COPY main.py calendar_client.py ./
 COPY templates/ ./templates/
 
 # Set environment variables for Flask
