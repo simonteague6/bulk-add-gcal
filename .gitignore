@@ -15,6 +15,7 @@ credentials.json
 
 # Random
 AGENTS.md
+.DS_Store
 
 # Settings
 calendar_aliases.json
