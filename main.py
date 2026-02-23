@@ -16,7 +16,6 @@ def hello_world():
 def handle_submit():
     global calendar_links
     bulk_text = request.form.get("bulk-text")
-    audio_file = request.files.get("audio-upload")
 
     if bulk_text:
         print(f"Received bulk text: {bulk_text}")
@@ -31,11 +30,6 @@ def handle_submit():
             print(f"Title: {summary} URL: {url}")
 
             calendar_links.append({"summary": summary, "url": url})
-
-    if audio_file:
-        print(f"Audio file uploaded: {audio_file.filename}")
-        # Save the file if needed:
-        # audio_file.save(f"uploads/{audio_file.filename}")
 
     # Redirect back to home or show success page
     return redirect(url_for("hello_world"))

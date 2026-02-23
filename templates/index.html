@@ -3,28 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BulkAdd Calendar Events</title>
+    <title>Bulk Calendar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        linear: {
+                            bg: '#0f0f0f',
+                            surface: '#1c1c1c',
+                            border: '#2a2a2a',
+                            accent: '#8b5cf6',
+                            accentHover: '#7c3aed',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+        }
+        .glow:focus-within {
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+        }
+    </style>
 </head>
-<body>
-<form action="/submit" method="POST" enctype="multipart/form-data">
-    <label for="bulk-text">Bulk Text</label>
-    <textarea id="bulk-text" name="bulk-text"></textarea>
-    
-    <label for="audio-upload">Audio Upload</label>
-    <input type="file" id="audio-upload" name="audio-upload" accept="audio/*">
+<body class="bg-linear-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+        <!-- Main Card -->
+        <div class="bg-linear-surface border border-linear-border rounded-2xl p-8 glow transition-shadow duration-300">
+            
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-white text-2xl font-semibold tracking-tight">Bulk Calendar</h1>
+                <p class="text-gray-400 mt-1 text-sm">Add multiple events at once, one per line</p>
+            </div>
 
-    <button type="submit">Submit</button>
+            <!-- Form -->
+            <form action="/submit" method="POST" class="space-y-6">
+                <div>
+                    <label for="bulk-text" class="block text-sm font-medium text-gray-300 mb-2">
+                        Events
+                    </label>
+                    <textarea 
+                        id="bulk-text" 
+                        name="bulk-text"
+                        rows="8"
+                        placeholder="Dinner with Sarah at 7pm tomorrow&#10;Team meeting Friday 2pm&#10;Doctor appointment March 15th"
+                        class="w-full bg-[#141414] border border-linear-border rounded-xl px-4 py-3 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent focus:ring-1 focus:ring-linear-accent transition-all resize-none"
+                    ></textarea>
+                </div>
 
-</form>
-{% if events %}
-<h2>Previously Scheduled Events</h2>
-{% endif %}
-<ul>
-    {% for event in events %}
-        <li>
-            <a href="{{ event.url }}" target="_blank">{{ event.summary }}</a>
-        </li>
-    {% endfor %}
-</ul>
+                <button 
+                    type="submit"
+                    class="w-full bg-linear-accent hover:bg-linear-accentHover text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    Add Events
+                </button>
+            </form>
+        </div>
+
+        <!-- Events List -->
+        {% if events %}
+        <div class="mt-8">
+            <h2 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-4 px-1">Previously Added</h2>
+            <div class="space-y-3">
+                {% for event in events %}
+                <a 
+                    href="{{ event.url }}" 
+                    target="_blank"
+                    class="block bg-linear-surface border border-linear-border rounded-xl p-4 hover:border-linear-accent/50 hover:bg-[#252525] transition-all duration-200 group"
+                >
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-200 font-medium group-hover:text-white transition-colors">{{ event.summary }}</span>
+                        <svg class="w-5 h-5 text-gray-500 group-hover:text-linear-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
