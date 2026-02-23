@@ -55,6 +55,25 @@ A Python Flask web application for bulk Google Calendar event creation using nat
    - Authenticate with Google when prompted
    - Go to Settings (gear icon) to configure your calendar aliases
 
+#### Installation with Docker
+
+1. **Build the Docker image**:
+   ```bash
+   docker compose build
+   ```
+
+2. **Configure Google OAuth**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a project and enable Google Calendar API
+   - Create OAuth 2.0 credentials (Desktop app)
+   - Download `credentials.json` and place in project root
+   - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
+
+3. **Start the container**:
+   ```bash
+   docker compose up
+   ```
+
 ## Usage
 
 ### Web Interface
@@ -144,24 +163,6 @@ Aliases are stored in `calendar_aliases.json`:
 
 ## Development
 
-#### Installation with Docker
-
-1. **Build the Docker image**:
-   ```bash
-   docker compose build
-   ```
-
-2. **Configure Google OAuth**:
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a project and enable Google Calendar API
-   - Create OAuth 2.0 credentials (Desktop app)
-   - Download `credentials.json` and place in project root
-   - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
-
-3. **Start the container**:
-   ```bash
-   docker compose up
-   ```
 
 ### Linting and Formatting
 
