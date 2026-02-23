@@ -144,11 +144,24 @@ Aliases are stored in `calendar_aliases.json`:
 
 ## Development
 
-### Running with Docker
+#### Installation with Docker
 
-```bash
-docker-compose up
-```
+1. **Build the Docker image**:
+   ```bash
+   docker compose build
+   ```
+
+2. **Configure Google OAuth**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a project and enable Google Calendar API
+   - Create OAuth 2.0 credentials (Desktop app)
+   - Download `credentials.json` and place in project root
+   - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
+
+3. **Start the container**:
+   ```bash
+   docker compose up
+   ```
 
 ### Linting and Formatting
 
