@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Bulk Calendar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        linear: {
+                            bg: '#0f0f0f',
+                            surface: '#1c1c1c',
+                            border: '#2a2a2a',
+                            accent: '#8b5cf6',
+                            accentHover: '#7c3aed',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-linear-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+        <!-- Main Card -->
+        <div class="bg-linear-surface border border-linear-border rounded-2xl p-8 glow">
+            
+            <!-- Header -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-white text-2xl font-semibold tracking-tight">Calendar Aliases</h1>
+                    <p class="text-gray-400 mt-1 text-sm">Map short names to your calendar IDs</p>
+                </div>
+                <a href="/" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-4 rounded-xl {% if category == 'error' %}bg-red-900/50 border border-red-700 text-red-200{% else %}bg-green-900/50 border border-green-700 text-green-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Help Text -->
+            <div class="mb-6 p-4 bg-[#141414] rounded-xl border border-linear-border">
+                <h3 class="text-gray-300 text-sm font-medium mb-2">How it works:</h3>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• Type <code class="bg-linear-border px-1.5 py-0.5 rounded text-gray-200">@alias</code> before events</li>
+                    <li>• Example: <code class="bg-linear-border px-1.5 py-0.5 rounded text-gray-200">@workout Push day monday 7pm</code></li>
+                    <li>• Use <code class="bg-linear-border px-1.5 py-0.5 rounded text-gray-200">primary</code> for your main calendar</li>
+                </ul>
+            </div>
+
+            <!-- Form -->
+            <form action="/settings" method="POST" class="space-y-4" id="aliases-form">
+                <div id="alias-rows">
+                    {% if aliases %}
+                        {% for alias, calendar_id in aliases.items() %}
+                        <div class="alias-row flex gap-3 mb-3">
+                            <input 
+                                type="text" 
+                                name="alias[]"
+                                value="{{ alias }}"
+                                placeholder="workout"
+                                class="flex-1 bg-[#141414] border border-linear-border rounded-lg px-3 py-2 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-sm"
+                            >
+                            <input 
+                                type="text" 
+                                name="calendar_id[]"
+                                value="{{ calendar_id }}"
+                                placeholder="primary or calendar ID"
+                                class="flex-[2] bg-[#141414] border border-linear-border rounded-lg px-3 py-2 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-sm"
+                            >
+                            <button 
+                                type="button"
+                                onclick="removeRow(this)"
+                                class="text-gray-500 hover:text-red-400 transition-colors px-2"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Default empty row -->
+                        <div class="alias-row flex gap-3 mb-3">
+                            <input 
+                                type="text" 
+                                name="alias[]"
+                                placeholder="workout"
+                                class="flex-1 bg-[#141414] border border-linear-border rounded-lg px-3 py-2 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-sm"
+                            >
+                            <input 
+                                type="text" 
+                                name="calendar_id[]"
+                                placeholder="primary or calendar ID"
+                                class="flex-[2] bg-[#141414] border border-linear-border rounded-lg px-3 py-2 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-sm"
+                            >
+                            <button 
+                                type="button"
+                                onclick="removeRow(this)"
+                                class="text-gray-500 hover:text-red-400 transition-colors px-2"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button 
+                    type="button"
+                    onclick="addRow()"
+                    class="w-full border border-dashed border-linear-border hover:border-linear-accent text-gray-400 hover:text-linear-accent font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm"
+                >
+                    + Add Another Alias
+                </button>
+
+                <button 
+                    type="submit"
+                    class="w-full bg-linear-accent hover:bg-linear-accentHover text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    Save Settings
+                </button>
+            </form>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-6 text-center">
+            <a href="/list-calendars" class="text-linear-accent hover:text-linear-accentHover text-sm transition-colors">
+                View all my calendar IDs →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function addRow() {
+            const container = document.getElementById('alias-rows');
+            const newRow = document.createElement('div');
+            newRow.className = 'alias-row flex gap-3 mb-3';
+            newRow.innerHTML = `
+                <input 
+                    type="text" 
+                    name="alias[]"
+                    placeholder="workout"
+                    class="flex-1 bg-[#141414] border border-linear-border rounded-lg px-3 py-2 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-sm"
+                >
+                <input 
+                    type="text" 
+                    name="calendar_id[]"
+                    placeholder="primary or calendar ID"
+                    class="flex-[2] bg-[#141414] border border-linear-border rounded-lg px-3 py-2 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-sm"
+                >
+                <button 
+                    type="button"
+                    onclick="removeRow(this)"
+                    class="text-gray-500 hover:text-red-400 transition-colors px-2"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeRow(button) {
+            const row = button.closest('.alias-row');
+            const container = document.getElementById('alias-rows');
+            if (container.children.length > 1) {
+                row.remove();
+            } else {
+                // Clear inputs instead of removing last row
+                row.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -14,5 +14,7 @@ token.json
 credentials.json
 
 # Random
-quickstart.py
 AGENTS.md
+
+# Settings
+calendar_aliases.json
