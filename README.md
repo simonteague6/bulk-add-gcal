@@ -1,4 +1,4 @@
-# Bulk Calendar
+# Batch Add Events
 
 A Python Flask web application for bulk Google Calendar event creation using natural language processing. Create multiple events at once by typing them in plain English, with support for routing events to different calendars using simple aliases.
 
