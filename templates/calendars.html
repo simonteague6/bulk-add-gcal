@@ -66,7 +66,7 @@
             <!-- Calendars List -->
             <div class="space-y-4">
                 {% for calendar in calendars %}
-                < class="bg-[#141414] border border-linear-border rounded-xl p-4 group hover:border-linear-accent/50 transition-colors">
+                <div class="bg-[#141414] border border-linear-border rounded-xl p-4 group hover:border-linear-accent/50 transition-colors">
                     <div class="flex items-start justify-between gap-4">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
@@ -90,7 +90,7 @@
                             {% if calendar.get('description') %}
                                 <p class="text-gray-500 text-xs mt-2">{{ calendar.description }}</p>
                             {% endif %}
-                        div</div>
+                        </div>
                         <span class="text-xs text-gray-500 flex-shrink-0">{{ calendar.get('accessRole', 'unknown') }}</span>
                     </div>
                 </div>
