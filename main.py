@@ -22,7 +22,7 @@ def handle_submit():
     if not bulk_text:
         return redirect(url_for("hello_world"))
     print(f"Received bulk text: {bulk_text}")
-    lines = [l.strip() for l in bulk_text.splitlines() if l.strip()]
+    lines = [line.strip() for line in bulk_text.splitlines() if line.strip()]
     service = calendar_client.build_service()
 
     calendar_links = []
