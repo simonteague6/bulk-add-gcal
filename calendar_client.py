@@ -32,7 +32,9 @@ def load_credentials():
             creds.refresh(Request())
         else:
             # Start browser-based OAuth flow for an installed app.
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                "data/credentials.json", SCOPES
+            )
             creds = flow.run_local_server(port=0)
 
         # Persist new tokens to disk for next run.

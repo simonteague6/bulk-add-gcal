@@ -42,7 +42,7 @@ A Python Flask web application for bulk Google Calendar event creation using nat
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a project and enable Google Calendar API
    - Create OAuth 2.0 credentials (Desktop app)
-   - Download `credentials.json` and place in project root
+   - Download `credentials.json` and place in `data/` directory
    - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
 
 5. **Run the application**:
@@ -66,7 +66,7 @@ A Python Flask web application for bulk Google Calendar event creation using nat
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a project and enable Google Calendar API
    - Create OAuth 2.0 credentials (Desktop app)
-   - Download `credentials.json` and place in project root
+   - Download `credentials.json` and place in `data/` directory
    - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
 
 3. **Start the container**:
@@ -145,20 +145,19 @@ Aliases are stored in `calendar_aliases.json`:
 
 ```
 .
-├── main.py                    # Flask web application
-├── calendar_client.py         # Google Calendar API client
-├── calendar_parser.py         # @alias text parser
-├── cal-request.py            # CLI tool
-├── list_calendars.py         # List all calendar IDs
-├── quickstart.py             # OAuth setup helper
-├── calendar_aliases.json     # User's alias configuration
+├── main.py                     # Flask web application
+├── calendar_client.py          # Google Calendar API client
+├── alias_parser.py             # @alias text parser
+├── list_calendars.py           # List all calendar IDs
+├── data/
+│   └── calendar_aliases.json   # User's alias configuration
 ├── templates/
-│   ├── index.html           # Main event creation page
-│   ├── settings.html        # Alias management page
-│   └── calendars.html       # Calendar ID list view
-├── pyproject.toml           # Project dependencies
-├── Dockerfile               # Container configuration
-└── docker-compose.yml       # Docker orchestration
+│   ├── index.html              # Main event creation page
+│   ├── settings.html           # Alias management page
+│   └── calendars.html          # Calendar ID list view
+├── pyproject.toml              # Project dependencies
+├── Dockerfile                  # Container configuration
+└── docker-compose.yml          # Docker orchestration
 ```
 
 ## Development
