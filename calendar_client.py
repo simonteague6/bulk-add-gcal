@@ -1,4 +1,3 @@
-import argparse
 import datetime as dt
 import os
 import os.path
@@ -50,9 +49,9 @@ def build_service():
     return service
 
 
-def create_event_quick_add(service, text: str):
+def create_event_quick_add(service, calendar_id: str, text: str):
     """Create an event using Google's natural language parsing (quickAdd)."""
-    return service.events().quickAdd(calendarId="primary", text=text).execute()
+    return service.events().quickAdd(calendarId=calendar_id, text=text).execute()
 
 
 def create_many_quick_add_events(service, eventList: list):

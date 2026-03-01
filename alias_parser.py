@@ -4,7 +4,7 @@ import json
 import re
 
 
-def load_aliases(config_path: str = "calendar_aliases.json") -> dict:
+def load_aliases(config_path: str = "data/calendar_aliases.json") -> dict:
     """Load calendar aliases from JSON config file.
 
     Returns a dict mapping alias names to calendar IDs.
@@ -18,7 +18,7 @@ def load_aliases(config_path: str = "calendar_aliases.json") -> dict:
         raise ValueError(f"Invalid JSON in {config_path}: {e}")
 
 
-def save_aliases(aliases: dict, config_path: str = "calendar_aliases.json") -> None:
+def save_aliases(aliases: dict, config_path: str = "data/calendar_aliases.json") -> None:
     """Save calendar aliases to JSON config file."""
     with open(config_path, "w") as f:
         json.dump(aliases, f, indent=2)
@@ -61,7 +61,7 @@ def parse_event_text(text: str, aliases: dict | None = None) -> tuple[str, str]:
     return (calendar_id, clean_text)
 
 
-def get_available_aliases(config_path: str = "calendar_aliases.json") -> list[str]:
+def get_available_aliases(config_path: str = "data/calendar_aliases.json") -> list[str]:
     """Return list of available alias names."""
     aliases = load_aliases(config_path)
     return list(aliases.keys())

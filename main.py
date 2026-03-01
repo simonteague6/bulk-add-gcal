@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 import calendar_client
-import calendar_parser
+import alias_parser
 
 calendar_links = []
 app = Flask(__name__)
@@ -10,7 +10,7 @@ app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
 
 @app.route("/")
 def hello_world():
-    aliases = calendar_parser.get_available_aliases()
+    aliases = alias_parser.get_available_aliases()
     return render_template("index.html", events=calendar_links, aliases=aliases)
 
 
@@ -30,17 +30,13 @@ def handle_submit():
 
     for line in lines:
         try:
-            calendar_id, clean_text = calendar_parser.parse_event_text(line)
-            event = (
-                service.events()
-                .quickAdd(calendarId=calendar_id, text=clean_text)
-                .execute()
-            )
+            calendar_id, clean_text = alias_parser.parse_event_text(line)
+            event = calendar_client.create_event_quick_add(service, calendar_id, clean_text)
 
             summary = event.get("summary", "NO SUMMARY")
             url = event.get("htmlLink", "NO URL")
-            print(f"Title: {summary} URL: {url} Calendar: {calendar_id}")
-            calendar_links.append({"summary": summary, "url": url})
+            #print(f"Title: {summary} URL: {url} Calendar: {calendar_id}")
+            calendar_links.append({"summary": summary, "url": url}) # add to list for display on homepage
         except ValueError as e:
             print(f"Error parsing line '{line}': {e}")
             errors.append(str(e))
@@ -67,11 +63,11 @@ def settings():
             if alias.strip() and cal_id.strip():
                 aliases[alias.strip().lower()] = cal_id.strip()
 
-        calendar_parser.save_aliases(aliases)
+        alias_parser.save_aliases(aliases)
         flash("Settings saved successfully!", "success")
         return redirect(url_for("settings"))
 
-    aliases = calendar_parser.load_aliases()
+    aliases = alias_parser.load_aliases()
     return render_template("settings.html", aliases=aliases)
 
 
