@@ -51,7 +51,9 @@ def submit():
     for error in errors:
         flash(error, "error")
 
-    # Store created events in the session so they survive the redirect.
-    session["recent_events"] = created_events
+    # Store only a limited number of created events in the session so they survive the redirect
+    # without risking cookie size overflow.
+    MAX_RECENT_EVENTS = 50
+    session["recent_events"] = created_events[-MAX_RECENT_EVENTS:]
 
     return redirect(url_for("events.index"))
