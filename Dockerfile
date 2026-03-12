@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -e .
 # Copy application source
 COPY run.py ./
 COPY app/ ./app/
-COPY data/ ./data/
+RUN mkdir -p ./data
 
 # Set environment variables for Flask
 ENV FLASK_APP=run.py
