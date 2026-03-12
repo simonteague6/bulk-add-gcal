@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """List all Google Calendar IDs available to the authenticated user."""
 
-import calendar_client
+from app.services import calendar_client
 
 
-def list_calendars(service):
-    """Fetch and display all calendars with their IDs.
+def list_calendars(service) -> list[dict]:
+    """Fetch all calendars the user has access to via the Calendar API.
 
-    Uses the Calendar API's calendarList endpoint to retrieve all calendars
-    the user has access to, including primary and shared calendars.
+    Uses the calendarList endpoint with pagination to retrieve all calendars,
+    including primary and shared calendars.
+
+    Args:
+        service: Authenticated Google Calendar API service object.
+
+    Returns:
+        List of calendar resource dicts from the Google Calendar API.
     """
     page_token = None
     calendars = []
@@ -25,7 +31,7 @@ def list_calendars(service):
 
 
 def main():
-    """Display all calendar IDs for the authenticated user."""
+    """CLI entry point: display all calendar IDs for the authenticated user."""
     try:
         service = calendar_client.build_service()
         calendars = list_calendars(service)

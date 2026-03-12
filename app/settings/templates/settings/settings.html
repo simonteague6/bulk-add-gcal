@@ -41,7 +41,7 @@
                     <h1 class="text-white text-2xl font-semibold tracking-tight">Calendar Aliases</h1>
                     <p class="text-gray-400 mt-1 text-sm">Map short names to your calendar IDs</p>
                 </div>
-                <a href="/" class="text-gray-400 hover:text-white transition-colors">
+                <a href="{{ url_for('events.index') }}" class="text-gray-400 hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Form -->
-            <form action="/settings" method="POST" class="space-y-4" id="aliases-form">
+            <form action="{{ url_for('settings.settings') }}" method="POST" class="space-y-4" id="aliases-form">
                 <div id="alias-rows">
                     {% if aliases %}
                         {% for alias, calendar_id in aliases.items() %}
@@ -147,7 +147,7 @@
 
         <!-- Quick Actions -->
         <div class="mt-6 text-center">
-            <a href="/list-calendars" class="text-linear-accent hover:text-linear-accentHover text-sm transition-colors">
+            <a href="{{ url_for('settings.list_calendars_view') }}" class="text-linear-accent hover:text-linear-accentHover text-sm transition-colors">
                 View all my calendar IDs →
             </a>
         </div>
@@ -190,7 +190,7 @@
             if (container.children.length > 1) {
                 row.remove();
             } else {
-                // Clear inputs instead of removing last row
+                // Clear inputs instead of removing the last row.
                 row.querySelectorAll('input').forEach(input => input.value = '');
             }
         }
