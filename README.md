@@ -8,7 +8,7 @@ A Python Flask web application for bulk Google Calendar event creation using nat
 - **Natural Language Processing**: Use Google's quickAdd API to parse event text like "Dinner with Sarah at 7pm tomorrow"
 - **Calendar Aliases**: Route events to specific calendars using `@alias` syntax (e.g., `@workout Push day Monday 7pm`)
 - **Web Interface**: Clean, modern UI for managing events and aliases
-- **CLI Tool**: Command-line interface for quick event creation
+- **Flask Blueprints**: Modular architecture for events, auth, and settings
 - **OAuth Authentication**: Secure Google Calendar API integration
 
 ## Quick Start
@@ -42,13 +42,13 @@ A Python Flask web application for bulk Google Calendar event creation using nat
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a project and enable Google Calendar API
    - Create OAuth 2.0 credentials (Desktop app)
-   - Download `credentials.json` and place in project root
+   - Download `credentials.json` and place in `data/` directory
    - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
 
 5. **Run the application**:
-   ```bash
-   uv run main.py
-   ```
+    ```bash
+    uv run run.py
+    ```
 
 6. **First-time setup**:
    - Visit `http://localhost:5485`
@@ -66,7 +66,7 @@ A Python Flask web application for bulk Google Calendar event creation using nat
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a project and enable Google Calendar API
    - Create OAuth 2.0 credentials (Desktop app)
-   - Download `credentials.json` and place in project root
+   - Download `credentials.json` and place in `data/` directory
    - Add `http://localhost:5485/oauth2callback` to authorized redirect URIs
 
 3. **Start the container**:
@@ -98,22 +98,10 @@ A Python Flask web application for bulk Google Calendar event creation using nat
    - Use `primary` for your main calendar
    - Copy calendar IDs from the list view
 
-### CLI Tool
-
-Create individual events from command line:
-
-```bash
-# Using natural language
-uv run cal-request.py --quick-add "Coffee with Alex tomorrow at 2pm"
-
-# Using explicit fields
-uv run cal-request.py --summary "Team Meeting" --start "2026-02-25T14:00:00" --end "2026-02-25T15:00:00"
-```
-
 ### List All Calendars
 
 ```bash
-uv run list_calendars.py
+uv run -m app.services.list_calendars
 ```
 
 Shows all calendars with their IDs for alias configuration.
@@ -122,7 +110,7 @@ Shows all calendars with their IDs for alias configuration.
 
 ### Calendar Aliases
 
-Aliases are stored in `calendar_aliases.json`:
+Aliases are stored in `data/calendar_aliases.json`:
 
 ```json
 {
@@ -145,20 +133,29 @@ Aliases are stored in `calendar_aliases.json`:
 
 ```
 .
-├── main.py                    # Flask web application
-├── calendar_client.py         # Google Calendar API client
-├── calendar_parser.py         # @alias text parser
-├── cal-request.py            # CLI tool
-├── list_calendars.py         # List all calendar IDs
-├── quickstart.py             # OAuth setup helper
-├── calendar_aliases.json     # User's alias configuration
-├── templates/
-│   ├── index.html           # Main event creation page
-│   ├── settings.html        # Alias management page
-│   └── calendars.html       # Calendar ID list view
-├── pyproject.toml           # Project dependencies
-├── Dockerfile               # Container configuration
-└── docker-compose.yml       # Docker orchestration
+├── run.py                      # Application entry point
+├── pyproject.toml              # Project dependencies
+├── Dockerfile                  # Container configuration
+├── docker-compose.yml          # Docker orchestration
+├── data/
+│   └── calendar_aliases.json   # User's alias configuration
+└── app/                        # Flask application
+    ├── __init__.py             # Flask app factory
+    ├── services/               # Core services
+    │   ├── calendar_client.py  # Google Calendar API client
+    │   ├── alias_parser.py     # @alias text parser
+    │   └── list_calendars.py   # List all calendar IDs
+    ├── events/                 # Event creation blueprint
+    │   ├── routes.py           # Event-related routes
+    │   └── templates/
+    │       └── events/
+    │           └── index.html  # Main event creation page
+    ├── auth/                   # Authentication blueprint
+    │   ├── routes.py           # OAuth routes
+    │   └── __init__.py
+    └── settings/               # Settings blueprint
+        ├── routes.py           # Alias management routes
+        └── __init__.py
 ```
 
 ## Development
@@ -176,8 +173,8 @@ uvx ruff format .
 
 ## How It Works
 
-1. **Event Parsing**: When you submit events, `calendar_parser.py` extracts `@alias` prefixes using regex
-2. **Alias Lookup**: The alias is looked up in `calendar_aliases.json` to get the real calendar ID
+1. **Event Parsing**: When you submit events, `app/services/alias_parser.py` extracts `@alias` prefixes using regex
+2. **Alias Lookup**: The alias is looked up in `data/calendar_aliases.json` to get the real calendar ID
 3. **API Call**: Google Calendar API's `quickAdd` endpoint parses the natural language and creates the event
 4. **Error Handling**: Unknown aliases show error messages; API errors are caught and displayed
 
@@ -192,7 +189,7 @@ uvx ruff format .
 
 **"Unknown calendar alias" error**:
 - Check your alias configuration in Settings
-- Verify the alias exists in `calendar_aliases.json`
+- Verify the alias exists in `data/calendar_aliases.json`
 
 **Authentication errors**:
 - Delete `token.json` to re-authenticate

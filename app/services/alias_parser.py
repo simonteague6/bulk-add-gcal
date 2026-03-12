@@ -1,4 +1,4 @@
-"""Parse event text to extract calendar aliases and route to correct calendar."""
+"""Parse event text to extract calendar aliases and route to the correct calendar."""
 
 import json
 import re
@@ -8,6 +8,7 @@ def load_aliases(config_path: str = "data/calendar_aliases.json") -> dict:
     """Load calendar aliases from JSON config file.
 
     Returns a dict mapping alias names to calendar IDs.
+    Returns an empty dict if the file does not exist.
     """
     try:
         with open(config_path, "r") as f:
@@ -18,7 +19,9 @@ def load_aliases(config_path: str = "data/calendar_aliases.json") -> dict:
         raise ValueError(f"Invalid JSON in {config_path}: {e}")
 
 
-def save_aliases(aliases: dict, config_path: str = "data/calendar_aliases.json") -> None:
+def save_aliases(
+    aliases: dict, config_path: str = "data/calendar_aliases.json"
+) -> None:
     """Save calendar aliases to JSON config file."""
     with open(config_path, "w") as f:
         json.dump(aliases, f, indent=2)
@@ -35,7 +38,7 @@ def parse_event_text(text: str, aliases: dict | None = None) -> tuple[str, str]:
         Tuple of (calendar_id, clean_text_without_alias)
 
     Raises:
-        ValueError: If alias is not found in the mapping
+        ValueError: If the alias prefix is present but not found in the mapping.
     """
     if aliases is None:
         aliases = load_aliases()
@@ -44,7 +47,7 @@ def parse_event_text(text: str, aliases: dict | None = None) -> tuple[str, str]:
     match = re.match(r"@(\w+)\s+(.*)", text.strip())
 
     if not match:
-        # No alias found, use primary calendar
+        # No alias found -- default to the primary calendar.
         return ("primary", text.strip())
 
     alias = match.group(1).lower()

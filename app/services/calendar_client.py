@@ -32,7 +32,11 @@ def load_credentials():
             creds.refresh(Request())
         else:
             # Start browser-based OAuth flow for an installed app.
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            # NOTE: This will be replaced with a proper web server OAuth flow
+            # when Issue #5 (Replace Google Cloud Console setup) is implemented.
+            flow = InstalledAppFlow.from_client_secrets_file(
+                "data/credentials.json", SCOPES
+            )
             creds = flow.run_local_server(port=0)
 
         # Persist new tokens to disk for next run.
@@ -43,21 +47,19 @@ def load_credentials():
 
 
 def build_service():
-    service = build("calendar", "v3", credentials=load_credentials())
-    return service
+    """Build and return an authenticated Google Calendar API v3 service."""
+    return build("calendar", "v3", credentials=load_credentials())
 
 
-def create_event_quick_add(service, calendar_id: str, text: str):
-    """Create an event using Google's natural language parsing (quickAdd)."""
+def create_event_quick_add(service, calendar_id: str, text: str) -> dict:
+    """Create an event using Google's natural language parsing (quickAdd).
+
+    Args:
+        service: Authenticated Google Calendar API service object.
+        calendar_id: The calendar ID to create the event on.
+        text: Natural language event description (e.g., "Team meeting Friday 2pm").
+
+    Returns:
+        The created event resource dict from the Google Calendar API.
+    """
     return service.events().quickAdd(calendarId=calendar_id, text=text).execute()
-
-
-def create_many_quick_add_events(service, eventList: list):
-    """Create an event using Google's natural language parsing (quickAdd)."""
-    results = []
-    for event in eventList:
-        serviceOutput = (
-            service.events().quickAdd(calendarId="primary", text=event).execute()
-        )
-        results.append(serviceOutput)
-    return results

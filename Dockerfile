@@ -4,18 +4,17 @@ WORKDIR /app
 
 # Install dependencies
 COPY pyproject.toml uv.lock* ./
-
-# Use pip to install dependencies from pyproject.toml
 RUN pip install --no-cache-dir -e .
 
-# Copy application files (add more in the future as needed)
-COPY main.py calendar_client.py ./
-COPY templates/ ./templates/
+# Copy application source
+COPY run.py ./
+COPY app/ ./app/
+RUN mkdir -p ./data
 
 # Set environment variables for Flask
-ENV FLASK_APP=main.py
+ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Run the Flask app
-CMD ["python", "main.py"]
+# Run the Flask app via the entry point
+CMD ["python", "run.py"]
