@@ -33,7 +33,7 @@ A Python Flask web application for bulk Google Calendar event creation using nat
 
 3. **Clone and setup**:
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/simonteague6/Batch-Add-Events
    cd bulk-calendar-app
    uv sync
    ```
