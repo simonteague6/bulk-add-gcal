@@ -39,8 +39,12 @@ def settings():
                 "error",
             )
 
-        alias_parser.save_aliases(aliases)
-        flash("Aliases saved successfully!", "success")
+        if aliases:
+            alias_parser.save_aliases(aliases)
+            flash(f"Aliases saved successfully! ({len(aliases)} aliases)", "success")
+        elif not invalid_aliases:
+            # No aliases provided at all
+            pass
         return redirect(url_for("settings.settings"))
 
     aliases = alias_parser.load_aliases()
