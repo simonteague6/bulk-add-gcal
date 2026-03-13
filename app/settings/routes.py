@@ -11,7 +11,8 @@ from app.settings import bp
 def settings():
     """Manage calendar aliases.
 
-    GET:  Render the settings page with existing alias mappings.
+    GET:  Render the settings page with existing alias mappings
+          and available Google calendars.
     POST: Save updated alias-to-calendar-ID mappings from the form.
     """
     if request.method == "POST":
@@ -29,16 +30,33 @@ def settings():
         return redirect(url_for("settings.settings"))
 
     aliases = alias_parser.load_aliases()
-    return render_template("settings/settings.html", aliases=aliases)
+
+    # Fetch calendars from Google API
+    calendars = []
+    try:
+        service = calendar_client.build_service()
+        calendars = list_calendars(service)
+    except Exception as e:
+        flash(f"Error fetching calendars: {e}", "error")
+
+    # Build reverse mapping: calendar_id -> list of aliases
+    aliases_by_calendar = {}
+    for alias, cal_id in aliases.items():
+        aliases_by_calendar.setdefault(cal_id, []).append(alias)
+
+    return render_template(
+        "settings/settings.html",
+        aliases=aliases,
+        calendars=calendars,
+        aliases_by_calendar=aliases_by_calendar
+    )
 
 
 @bp.route("/list-calendars")
 def list_calendars_view():
-    """Display all Google calendars available to the authenticated user."""
-    try:
-        service = calendar_client.build_service()
-        calendars = list_calendars(service)
-        return render_template("settings/calendars.html", calendars=calendars)
-    except Exception as e:
-        flash(f"Error fetching calendars: {e}", "error")
-        return redirect(url_for("settings.settings"))
+    """Redirect to the unified settings page.
+
+    Previously displayed all Google calendars in a separate page.
+    Now consolidated into the main settings interface.
+    """
+    return redirect(url_for("settings.settings"))
