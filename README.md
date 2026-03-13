@@ -90,7 +90,7 @@ A Python Flask web application for bulk Google Calendar event creation using nat
 
 2. **Configure Aliases**:
    - Click the settings gear icon
-   - Enter short names next to calendars you own
+   - Enter short names next to calendars you can write to
    - Read-only calendars are hidden by default (click to expand)
    - Save your changes
 
