@@ -1,6 +1,7 @@
 """Routes for the settings blueprint: calendar alias management."""
 
 from flask import flash, redirect, render_template, request, url_for
+import re
 
 from app.services import alias_parser, calendar_client
 from app.services.list_calendars import list_calendars
@@ -17,10 +18,26 @@ def settings():
     """
     if request.method == "POST":
         aliases = {}
+        invalid_aliases = []
         for key, value in request.form.items():
             if key.startswith("alias_for__") and value.strip():
+                raw_value = value.strip()
                 calendar_id = key[11:]  # Remove "alias_for__" prefix
-                aliases[value.strip().lower()] = calendar_id
+                # Normalize alias: strip leading '@' if present and lowercase
+                normalized = raw_value.lstrip("@").lower()
+                # Validate alias to match what alias_parser.parse_event_text() can parse
+                if re.fullmatch(r"\w+", normalized):
+                    aliases[normalized] = calendar_id
+                else:
+                    invalid_aliases.append(raw_value)
+
+        if invalid_aliases:
+            # Inform the user that some aliases were not saved due to invalid characters
+            flash(
+                "These aliases were not saved because they contain invalid characters: "
+                + ", ".join(sorted(set(invalid_aliases))),
+                "error",
+            )
 
         alias_parser.save_aliases(aliases)
         flash("Aliases saved successfully!", "success")
