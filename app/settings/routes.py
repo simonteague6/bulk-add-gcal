@@ -11,22 +11,19 @@ from app.settings import bp
 def settings():
     """Manage calendar aliases.
 
-    GET:  Render the settings page with existing alias mappings
-          and available Google calendars.
+    GET:  Render the settings page with calendars grouped by access role
+          and alias fields for writable calendars.
     POST: Save updated alias-to-calendar-ID mappings from the form.
     """
     if request.method == "POST":
-        aliases_data = request.form.getlist("alias[]")
-        calendar_ids = request.form.getlist("calendar_id[]")
-
-        aliases = {
-            alias.strip().lower(): cal_id.strip()
-            for alias, cal_id in zip(aliases_data, calendar_ids)
-            if alias.strip() and cal_id.strip()
-        }
+        aliases = {}
+        for key, value in request.form.items():
+            if key.startswith("alias_for__") and value.strip():
+                calendar_id = key[11:]  # Remove "alias_for__" prefix
+                aliases[value.strip().lower()] = calendar_id
 
         alias_parser.save_aliases(aliases)
-        flash("Settings saved successfully!", "success")
+        flash("Aliases saved successfully!", "success")
         return redirect(url_for("settings.settings"))
 
     aliases = alias_parser.load_aliases()
@@ -39,16 +36,34 @@ def settings():
     except Exception as e:
         flash(f"Error fetching calendars: {e}", "error")
 
-    # Build reverse mapping: calendar_id -> list of aliases
-    aliases_by_calendar = {}
+    # Group calendars by access role
+    writable_calendars = [
+        c for c in calendars if c.get("accessRole") in ("owner", "writer")
+    ]
+    readonly_calendars = [
+        c for c in calendars if c.get("accessRole") in ("reader", "freeBusyReader")
+    ]
+
+    # Sort writable calendars: primary first, then alphabetically by name
+    writable_calendars.sort(
+        key=lambda c: (0 if c.get("primary") else 1, c.get("summary", "").lower())
+    )
+
+    # Sort read-only calendars alphabetically by name
+    readonly_calendars.sort(key=lambda c: c.get("summary", "").lower())
+
+    # Build reverse mapping: calendar_id -> alias (for pre-filling fields)
+    # Use the first alias found for each calendar ID
+    alias_for_calendar = {}
     for alias, cal_id in aliases.items():
-        aliases_by_calendar.setdefault(cal_id, []).append(alias)
+        if cal_id not in alias_for_calendar:
+            alias_for_calendar[cal_id] = alias
 
     return render_template(
         "settings/settings.html",
-        aliases=aliases,
-        calendars=calendars,
-        aliases_by_calendar=aliases_by_calendar
+        writable_calendars=writable_calendars,
+        readonly_calendars=readonly_calendars,
+        alias_for_calendar=alias_for_calendar,
     )
 
 
