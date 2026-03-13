@@ -90,21 +90,22 @@ A Python Flask web application for bulk Google Calendar event creation using nat
 
 2. **Configure Aliases**:
    - Click the settings gear icon
-   - Add alias → calendar ID mappings
-   - Click "View all my calendar IDs" to see available calendars
+   - Enter short names next to calendars you can write to
+   - Read-only calendars are hidden by default (click to expand)
+   - Save your changes
 
-3. **Manage Aliases**:
-   - Add multiple aliases dynamically
-   - Use `primary` for your main calendar
-   - Copy calendar IDs from the list view
+3. **Using Aliases**:
+   - Type `@alias` before events to route to specific calendars
+   - Use `primary` for your main calendar (or leave alias blank)
+   - Example: `@workout Push day Monday 7pm`
 
-### List All Calendars
+### List Calendars (CLI)
 
 ```bash
 uv run -m app.services.list_calendars
 ```
 
-Shows all calendars with their IDs for alias configuration.
+Lists all calendars with their IDs (useful for debugging).
 
 ## Configuration
 
