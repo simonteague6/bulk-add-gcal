@@ -17,6 +17,17 @@ def settings():
     POST: Save updated alias-to-calendar-ID mappings from the form.
     """
     if request.method == "POST":
+        # Only save aliases if the form actually contained alias fields.
+        has_alias_fields = any(
+            key.startswith("alias_for__") for key in request.form.keys()
+        )
+        if not has_alias_fields:
+            flash(
+                "No calendar aliases were submitted; existing aliases were not changed.",
+                "error",
+            )
+            return redirect(url_for("settings.settings"))
+
         aliases = {}
         invalid_aliases = []
         for key, value in request.form.items():
