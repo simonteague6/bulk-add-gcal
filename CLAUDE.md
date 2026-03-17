@@ -18,11 +18,15 @@ uvx ruff format .
 # List user's Google Calendar IDs (useful for configuring aliases)
 uv run -m app.services.list_calendars
 
+# Run tests
+uv run pytest
+
+# Run tests with coverage
+uv run pytest --cov=app --cov-report=term-missing
+
 # Docker
 docker compose up
 ```
-
-No automated test suite exists.
 
 ## Architecture
 
@@ -49,7 +53,18 @@ User submits textarea (one event per line) → each line is parsed for `@alias` 
 - `calendar_aliases.json` — user alias config (not in git, managed via Settings UI)
 
 ### Notes
-
 - Current OAuth uses `InstalledAppFlow` (desktop mode); migration to web server flow is planned (Issue #5)
 - Flask `SECRET_KEY` defaults to a dev key; set via env var for production
 - Frontend uses only Tailwind CSS (CDN) and vanilla JS — no build step
+
+## Testing
+
+Test suite located in `tests/` directory using pytest with mocked Google Calendar API:
+
+- `conftest.py` — shared fixtures (app, client, mocks)
+- `test_alias_parser.py` — alias parsing logic (18 tests)
+- `test_calendar_client.py` — Google API client (6 tests)
+- `test_routes.py` — route integration tests (19 tests)
+- `test_list_calendars.py` — calendar listing (4 tests)
+
+All Google API calls are mocked via `pytest-mock`. No real API credentials needed for tests.
