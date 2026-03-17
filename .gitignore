@@ -20,3 +20,8 @@ REFACTOR_PLAN.md
 
 # Settings
 calendar_aliases.json
+
+# Test coverage
+.coverage
+htmlcov/
+coverage_annotations/
