@@ -161,7 +161,6 @@ Aliases are stored in `data/calendar_aliases.json`:
 
 ## Development
 
-
 ### Linting and Formatting
 
 ```bash
@@ -171,6 +170,44 @@ uvx ruff check .
 # Format code
 uvx ruff format .
 ```
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run with verbose output
+uv run pytest -v
+
+# Run with coverage report
+uv run pytest --cov=app --cov-report=term-missing
+
+# Run specific test file
+uv run pytest tests/test_alias_parser.py
+```
+
+The test suite uses pytest with mocked Google Calendar API calls. Tests cover:
+- Alias parsing logic (`tests/test_alias_parser.py`)
+- Calendar client functions (`tests/test_calendar_client.py`)
+- Route handlers (`tests/test_routes.py`)
+- Calendar listing (`tests/test_list_calendars.py`)
+
+## Responsive Design
+
+The interface adapts to different screen sizes:
+
+- **Desktop**: Full-width layouts with side-by-side elements
+- **Tablet**: Adjusted spacing and scaled typography
+- **Mobile**: Stacked layouts, larger touch targets (44px minimum), and optimized form inputs
+
+### Mobile Usage Tips
+
+- **Typing events**: The textarea expands as you type. Use one line per event.
+- **Adding aliases**: Type `@alias` followed by a space before your event text (e.g., `@work Meeting at 2pm`)
+- **Settings**: Read-only calendars are hidden by default—tap "Show read-only calendars" to view them
+- **Touch targets**: All buttons and links are sized for easy tapping
+- **Theme**: Toggle between light and dark mode using the button in the navigation bar
 
 ## How It Works
 
@@ -199,4 +236,8 @@ uvx ruff format .
 **Events not appearing**:
 - Check the correct calendar is selected in Google Calendar UI
 - Verify the calendar ID in your alias configuration
+
+**Mobile issues**:
+- If text is too small, use browser zoom or check device accessibility settings
+- Clear browser cache if the app seems stuck or unresponsive
 
