@@ -3,6 +3,7 @@
 import os
 
 from flask import Flask
+from app.models import db
 
 
 def create_app() -> Flask:
@@ -17,6 +18,18 @@ def create_app() -> Flask:
     """
     app = Flask(__name__)
     app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
+
+    # Database config — SQLite file in data/ directory
+    db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "data", "app.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+
+    # Initialize SQLAlchemy with this app
+    db.init_app(app)
+
+    # Create tables if they don't exist yet
+    with app.app_context():
+        db.create_all()
+
 
     # Register blueprints
     from app.events import bp as events_bp
