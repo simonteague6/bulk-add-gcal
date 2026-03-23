@@ -12,7 +12,12 @@ bp = Blueprint("auth", __name__, template_folder="templates")
 google_bp = make_google_blueprint(
     client_id=os.getenv("GOOGLE_CLIENT_ID"),
     client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    scope=["openid", "email", "profile", "https://www.googleapis.com/auth/calendar"],
+    scope=[
+        "openid",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/calendar",
+    ],
     storage=SQLAlchemyStorage(OAuth, db.session, user=current_user),
     redirect_url="/",  # Where to go after successful login
 )
@@ -51,3 +56,5 @@ def google_logged_in(blueprint, token):
     # Return False to tell Flask-Dance we handled token storage ourselves
     # (it will still store the token via SQLAlchemyStorage)
     return False
+
+from app.auth import routes  # noqa: E402, F401
