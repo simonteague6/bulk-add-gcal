@@ -4,6 +4,8 @@ import os
 
 from flask import Flask
 from app.models import db
+from flask_login import LoginManager
+
 
 
 def create_app() -> Flask:
@@ -25,6 +27,20 @@ def create_app() -> Flask:
 
     # Initialize SQLAlchemy with this app
     db.init_app(app)
+
+    # Set up Flask-Login
+    login_manager = LoginManager()
+    login_manager.login_view = "auth.login"
+
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        """Flask-Login calls this on every request to load the user from the
+        session cookie's stored user_id."""
+        from app.models import User
+        return User.query.get(int(user_id))
+
 
     # Create tables if they don't exist yet
     with app.app_context():
