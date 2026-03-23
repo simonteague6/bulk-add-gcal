@@ -53,8 +53,4 @@ def google_logged_in(blueprint, token):
     # Log the user in (sets the session cookie)
     login_user(user)
 
-    # Return False to tell Flask-Dance we handled token storage ourselves
-    # (it will still store the token via SQLAlchemyStorage)
-    return False
-
 from app.auth import routes  # noqa: E402, F401
