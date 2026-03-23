@@ -1,35 +1,19 @@
-"""Routes for the auth blueprint.
-
-Currently stubs only. Full implementation will be added in Issue #5:
-"Replace Google Cloud Console setup with direct Google Signup/OAuth flow".
-
-Planned routes:
-- GET  /login           -- Redirect user to Google OAuth consent screen
-- GET  /logout          -- Clear session and log user out
-- GET  /oauth2callback  -- Handle redirect from Google after user grants access
-"""
-
 from flask import flash, redirect, url_for
+from flask_login import login_required, logout_user
 
 from app.auth import bp
 
 
 @bp.route("/login")
 def login():
-    """Stub: will initiate the Google OAuth web server flow (Issue #5)."""
-    flash("Login is not yet implemented. Running in single-user mode.", "error")
-    return redirect(url_for("events.index"))
+    """Redirect to Google OAuth consent screen via Flask-Dance."""
+    return redirect(url_for("google.login"))
 
 
 @bp.route("/logout")
+@login_required
 def logout():
-    """Stub: will clear the user session and OAuth tokens (Issue #5)."""
-    flash("Logout is not yet implemented.", "error")
-    return redirect(url_for("events.index"))
-
-
-@bp.route("/oauth2callback")
-def oauth2callback():
-    """Stub: will handle the OAuth redirect callback from Google (Issue #5)."""
-    flash("OAuth callback is not yet implemented.", "error")
+    """Clear the user's session."""
+    logout_user()
+    flash("You have been logged out.", "success")
     return redirect(url_for("events.index"))
