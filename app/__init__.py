@@ -6,8 +6,14 @@ from flask import Flask
 from app.models import db
 from flask_login import LoginManager
 
+# Allow OAuth over HTTP in development. oauthlib enforces HTTPS by default,
+# which breaks localhost. Never set this in production — set FLASK_ENV=production
+# on your deployment host and this block won't run.
+if os.getenv("FLASK_ENV") != "production":
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-def create_app() -> Flask:
+
+def create_app(test_config: dict | None = None) -> Flask:
     """Create and configure the Flask application.
 
     Uses the application factory pattern so the app can be created with
