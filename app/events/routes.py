@@ -6,7 +6,6 @@ from flask_dance.contrib.google import google
 
 from app.events import bp
 from app.services import alias_parser, calendar_client
-from app.models import CalendarAlias
 
 
 @bp.route("/")
