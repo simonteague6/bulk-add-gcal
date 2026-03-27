@@ -15,6 +15,7 @@ RUN mkdir -p ./data
 ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
+EXPOSE 5485
 
 # Run the Flask app via the entry point
 CMD ["python", "run.py"]

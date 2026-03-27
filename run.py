@@ -9,6 +9,10 @@ import os
 
 from app import create_app
 
+from dotenv import load_dotenv
+
+load_dotenv()  # reads variables from a .env file and sets them in os.environ
+
 app = create_app()
 
 if __name__ == "__main__":

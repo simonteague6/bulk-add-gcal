@@ -1,30 +1,33 @@
 """Parse event text to extract calendar aliases and route to the correct calendar."""
 
-import json
 import re
+from app.models import CalendarAlias, db
 
 
-def load_aliases(config_path: str = "data/calendar_aliases.json") -> dict:
-    """Load calendar aliases from JSON config file.
+def load_aliases(user_id: int) -> dict:
+    """Load calendar aliases from CalendarAlias table for the given user.
 
     Returns a dict mapping alias names to calendar IDs.
-    Returns an empty dict if the file does not exist.
+    Returns an empty dict if no aliases are configured.
     """
-    try:
-        with open(config_path, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in {config_path}: {e}")
+    aliases = {}
+    for a in CalendarAlias.query.filter_by(user_id=user_id).all():
+        aliases[a.alias] = a.calendar_id
+    return aliases
 
 
-def save_aliases(
-    aliases: dict, config_path: str = "data/calendar_aliases.json"
-) -> None:
-    """Save calendar aliases to JSON config file."""
-    with open(config_path, "w") as f:
-        json.dump(aliases, f, indent=2)
+
+def save_aliases(aliases: dict, user_id: int) -> None:
+    """Save calendar aliases to database for the given user."""
+    # Delete existing aliases
+    CalendarAlias.query.filter_by(user_id=user_id).delete()
+    # Add new aliases
+    for alias, calendar_id in aliases.items():
+        new_alias = CalendarAlias(user_id=user_id, alias=alias, calendar_id=calendar_id)
+        db.session.add(new_alias)
+    db.session.commit()
+
+
 
 
 def parse_event_text(text: str, aliases: dict | None = None) -> tuple[str, str]:
@@ -64,7 +67,7 @@ def parse_event_text(text: str, aliases: dict | None = None) -> tuple[str, str]:
     return (calendar_id, clean_text)
 
 
-def get_available_aliases(config_path: str = "data/calendar_aliases.json") -> list[str]:
+def get_available_aliases(user_id: int) -> list[str]:
     """Return list of available alias names."""
-    aliases = load_aliases(config_path)
+    aliases = load_aliases(user_id)
     return list(aliases.keys())

@@ -4,7 +4,13 @@ services:
     ports:
       - "5485:5485"
     volumes:
-      - .:/app
+      - app-data:/app/data
     environment:
-      - FLASK_ENV=development
+      - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
+      - SECRET_KEY=${SECRET_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+
+volumes:
+  app-data:

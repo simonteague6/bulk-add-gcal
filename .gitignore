@@ -10,12 +10,13 @@ wheels/
 .venv
 
 # Credentials
+data/app.db
 token.json
 credentials.json
+.env
 
 # Random
 AGENTS.md
-REFACTOR_PLAN.md
 .DS_Store
 
 # Settings
