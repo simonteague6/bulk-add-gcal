@@ -43,6 +43,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     # Set up Flask-Login
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
+    login_manager.login_message = None  # Disable the default login message
 
     login_manager.init_app(app)
 
