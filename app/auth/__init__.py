@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, flash, redirect, url_for
+from flask import Blueprint, flash
 from flask_dance.contrib.google import make_google_blueprint
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
 from flask_dance.consumer import oauth_authorized
