@@ -16,4 +16,4 @@ def logout():
     """Clear the user's session."""
     logout_user()
     flash("You have been logged out.", "success")
-    return redirect(url_for("events.index"))
+    return redirect(url_for("auth.login"))
