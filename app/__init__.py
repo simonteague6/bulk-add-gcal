@@ -68,8 +68,10 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.register_blueprint(auth_bp)
     app.register_blueprint(google_bp, url_prefix="/login")
 
-    # Trust X-Forwarded-* headers from reverse proxy (e.g., Railway)
-    # This ensures OAuth redirects use HTTPS when accessed via a proxy
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+    # Trust X-Forwarded-Proto header from reverse proxy (e.g., Railway in production).
+    # This ensures OAuth redirects use HTTPS when the app is behind a TLS-terminating proxy.
+    # Only enable when running behind a trusted proxy; set TRUST_PROXY_HEADERS=1 in production.
+    if os.getenv("TRUST_PROXY_HEADERS") == "1":
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 
     return app
