@@ -45,6 +45,10 @@ def google_logged_in(blueprint, token):
     email = info.get("email")
     name = info.get("name", "")
 
+    # Ensure we have a valid email before querying/creating the user
+    if not isinstance(email, str) or not email.strip():
+        flash("Your Google account did not provide an email address. Please try a different account.", "error")
+        return False
     # Find or create the user
     user = User.query.filter_by(email=email).first()
     if not user:
