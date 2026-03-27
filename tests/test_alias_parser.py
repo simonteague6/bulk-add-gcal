@@ -1,62 +1,80 @@
-import json
-
 import pytest
+import flask_login
 
 from app.services import alias_parser
 
 
 class TestLoadAliases:
-    def test_load_aliases_existing_file(self, tmp_path):
-        aliases_data = {"work": "work@example.com", "personal": "personal@example.com"}
-        aliases_file = tmp_path / "aliases.json"
-        aliases_file.write_text(json.dumps(aliases_data))
+    def test_returns_user_aliases(self, app, user, user_aliases):
+        with app.test_request_context():
+            flask_login.login_user(user)
+            result = alias_parser.load_aliases()
 
-        result = alias_parser.load_aliases(str(aliases_file))
+        assert result == {"work": "work@example.com", "personal": "personal@example.com"}
 
-        assert result == aliases_data
-
-    def test_load_aliases_missing_file(self, tmp_path):
-        result = alias_parser.load_aliases(str(tmp_path / "nonexistent.json"))
+    def test_empty_when_no_aliases(self, app, user):
+        with app.test_request_context():
+            flask_login.login_user(user)
+            result = alias_parser.load_aliases()
 
         assert result == {}
 
-    def test_load_aliases_invalid_json(self, tmp_path):
-        aliases_file = tmp_path / "invalid.json"
-        aliases_file.write_text("not valid json")
+    def test_only_returns_current_user(self, app, user, second_user):
+        from app.models import db, CalendarAlias
 
-        with pytest.raises(ValueError, match="Invalid JSON"):
-            alias_parser.load_aliases(str(aliases_file))
+        db.session.add(
+            CalendarAlias(user_id=user.id, alias="mine", calendar_id="mine@example.com")
+        )
+        db.session.add(
+            CalendarAlias(
+                user_id=second_user.id,
+                alias="theirs",
+                calendar_id="theirs@example.com",
+            )
+        )
+        db.session.commit()
+
+        with app.test_request_context():
+            flask_login.login_user(user)
+            result = alias_parser.load_aliases()
+
+        assert result == {"mine": "mine@example.com"}
+        assert "theirs" not in result
 
 
 class TestSaveAliases:
-    def test_save_aliases_creates_file(self, tmp_path):
-        aliases_data = {"work": "work@example.com"}
-        aliases_file = tmp_path / "aliases.json"
+    def test_creates_db_rows(self, app, user):
+        from app.models import CalendarAlias
 
-        alias_parser.save_aliases(aliases_data, str(aliases_file))
+        with app.test_request_context():
+            flask_login.login_user(user)
+            alias_parser.save_aliases({"work": "work@example.com"})
 
-        assert aliases_file.exists()
-        with open(aliases_file) as f:
-            assert json.load(f) == aliases_data
+        rows = CalendarAlias.query.filter_by(user_id=user.id).all()
+        assert len(rows) == 1
+        assert rows[0].alias == "work"
+        assert rows[0].calendar_id == "work@example.com"
 
-    def test_save_aliases_overwrites_existing(self, tmp_path):
-        aliases_file = tmp_path / "aliases.json"
-        aliases_file.write_text(json.dumps({"old": "old@example.com"}))
+    def test_replaces_existing(self, app, user, user_aliases):
+        from app.models import CalendarAlias
 
-        new_data = {"new": "new@example.com"}
-        alias_parser.save_aliases(new_data, str(aliases_file))
+        with app.test_request_context():
+            flask_login.login_user(user)
+            alias_parser.save_aliases({"new": "new@example.com"})
 
-        with open(aliases_file) as f:
-            assert json.load(f) == new_data
+        rows = CalendarAlias.query.filter_by(user_id=user.id).all()
+        assert len(rows) == 1
+        assert rows[0].alias == "new"
 
-    def test_save_aliases_empty_dict(self, tmp_path):
-        aliases_file = tmp_path / "aliases.json"
-        aliases_file.write_text(json.dumps({"existing": "data@example.com"}))
+    def test_empty_dict_clears(self, app, user, user_aliases):
+        from app.models import CalendarAlias
 
-        alias_parser.save_aliases({}, str(aliases_file))
+        with app.test_request_context():
+            flask_login.login_user(user)
+            alias_parser.save_aliases({})
 
-        with open(aliases_file) as f:
-            assert json.load(f) == {}
+        rows = CalendarAlias.query.filter_by(user_id=user.id).all()
+        assert len(rows) == 0
 
 
 class TestParseEventText:
@@ -152,16 +170,16 @@ class TestParseEventText:
 
 
 class TestGetAvailableAliases:
-    def test_get_available_aliases(self, tmp_path, monkeypatch):
-        aliases_data = {"work": "work@example.com", "personal": "personal@example.com"}
-        aliases_file = tmp_path / "aliases.json"
-        aliases_file.write_text(json.dumps(aliases_data))
-
-        result = alias_parser.get_available_aliases(str(aliases_file))
+    def test_returns_names(self, app, user, user_aliases):
+        with app.test_request_context():
+            flask_login.login_user(user)
+            result = alias_parser.get_available_aliases()
 
         assert set(result) == {"work", "personal"}
 
-    def test_get_available_aliases_empty(self, tmp_path):
-        result = alias_parser.get_available_aliases(str(tmp_path / "nonexistent.json"))
+    def test_empty(self, app, user):
+        with app.test_request_context():
+            flask_login.login_user(user)
+            result = alias_parser.get_available_aliases()
 
         assert result == []

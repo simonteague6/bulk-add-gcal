@@ -1,77 +1,42 @@
-import pytest
-
 from app.services import calendar_client
 
 
-class TestLoadCredentials:
-    def test_load_credentials_from_existing_token(self, mocker, tmp_path):
+class TestBuildServiceForUser:
+    def test_builds_credentials_from_token(self, mocker):
         mock_creds = mocker.MagicMock()
-        mock_creds.valid = True
-        mock_creds.expired = False
-
-        mocker.patch("os.path.exists", return_value=True)
         mocker.patch(
-            "app.services.calendar_client.Credentials.from_authorized_user_file",
-            return_value=mock_creds,
+            "app.services.calendar_client.Credentials", return_value=mock_creds
+        )
+        mock_build = mocker.patch(
+            "app.services.calendar_client.build", return_value=mocker.MagicMock()
         )
 
-        result = calendar_client.load_credentials()
+        token = {
+            "access_token": "test-access-token",
+            "refresh_token": "test-refresh-token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
 
-        assert result == mock_creds
+        result = calendar_client.build_service_for_user(token)
 
-    def test_load_credentials_refreshes_expired(self, mocker, tmp_path):
-        mock_creds = mocker.MagicMock()
-        mock_creds.valid = False
-        mock_creds.expired = True
-        mock_creds.refresh_token = "refresh_token"
-        mock_creds.to_json.return_value = '{"token": "refreshed"}'
+        mock_build.assert_called_once_with("calendar", "v3", credentials=mock_creds)
+        assert result == mock_build.return_value
 
-        mocker.patch("os.path.exists", return_value=True)
-        mocker.patch(
-            "app.services.calendar_client.Credentials.from_authorized_user_file",
-            return_value=mock_creds,
-        )
-        mocker.patch("builtins.open", mocker.mock_open())
+    def test_passes_refresh_token(self, mocker):
+        mock_creds_cls = mocker.patch("app.services.calendar_client.Credentials")
+        mocker.patch("app.services.calendar_client.build")
 
-        result = calendar_client.load_credentials()
+        token = {
+            "access_token": "test-access-token",
+            "refresh_token": "my-refresh-token",
+        }
 
-        mock_creds.refresh.assert_called_once()
-        assert result == mock_creds
+        calendar_client.build_service_for_user(token)
 
-    def test_load_credentials_no_token_starts_flow(self, mocker, tmp_path):
-        mock_creds = mocker.MagicMock()
-        mock_creds.valid = True
-        mock_creds.to_json.return_value = '{"token": "test"}'
-
-        mock_flow = mocker.MagicMock()
-        mock_flow.run_local_server.return_value = mock_creds
-
-        mocker.patch("os.path.exists", return_value=False)
-        mocker.patch(
-            "app.services.calendar_client.InstalledAppFlow.from_client_secrets_file",
-            return_value=mock_flow,
-        )
-        mock_open = mocker.patch("builtins.open", mocker.mock_open())
-
-        result = calendar_client.load_credentials()
-
-        mock_flow.run_local_server.assert_called_once()
-        assert result == mock_creds
-
-
-class TestBuildService:
-    def test_build_service_returns_service(self, mocker):
-        mock_creds = mocker.MagicMock()
-        mock_service = mocker.MagicMock()
-
-        mocker.patch(
-            "app.services.calendar_client.load_credentials", return_value=mock_creds
-        )
-        mocker.patch("app.services.calendar_client.build", return_value=mock_service)
-
-        result = calendar_client.build_service()
-
-        assert result == mock_service
+        call_kwargs = mock_creds_cls.call_args[1]
+        assert call_kwargs["token"] == "test-access-token"
+        assert call_kwargs["refresh_token"] == "my-refresh-token"
 
 
 class TestCreateEventQuickAdd:

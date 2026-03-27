@@ -32,6 +32,9 @@ def create_app(test_config: dict | None = None) -> Flask:
     )
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 
+    if test_config:
+        app.config.update(test_config)
+
     # Initialize SQLAlchemy with this app
     db.init_app(app)
 
