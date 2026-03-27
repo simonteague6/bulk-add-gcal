@@ -6,8 +6,7 @@ from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
 from flask_dance.contrib.google import google
 
-from app.models import db, CalendarAlias
-from app.services import calendar_client
+from app.services import calendar_client, alias_parser
 from app.services.list_calendars import list_calendars
 from app.settings import bp
 
@@ -52,15 +51,7 @@ def settings():
             )
 
         if aliases:
-            # Delete this user's existing aliases, then insert the new set
-            CalendarAlias.query.filter_by(user_id=current_user.id).delete()
-            for alias_name, cal_id in aliases.items():
-                db.session.add(CalendarAlias(
-                    user_id=current_user.id,
-                    alias=alias_name,
-                    calendar_id=cal_id,
-                ))
-            db.session.commit()
+            alias_parser.save_aliases(aliases)
             flash(f"Aliases saved successfully! ({len(aliases)} aliases)", "success")
 
         return redirect(url_for("settings.settings"))
