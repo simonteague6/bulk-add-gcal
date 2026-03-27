@@ -37,7 +37,10 @@ def submit():
 
     # Ensure the user has a valid Google OAuth token before using the Calendar API
     if not google.authorized or not google.token:
-        flash("Your Google connection has expired or is missing. Please reconnect and try again.", "error")
+        flash(
+            "Your Google connection has expired or is missing. Please reconnect and try again.",
+            "error",
+        )
         return redirect(url_for("google.login"))
     # Build the Calendar API service from the current user's OAuth token
     service = calendar_client.build_service_for_user(google.token)

@@ -16,7 +16,6 @@ def load_aliases(user_id: int) -> dict:
     return aliases
 
 
-
 def save_aliases(aliases: dict, user_id: int) -> None:
     """Save calendar aliases to database for the given user."""
     # Delete existing aliases
@@ -26,8 +25,6 @@ def save_aliases(aliases: dict, user_id: int) -> None:
         new_alias = CalendarAlias(user_id=user_id, alias=alias, calendar_id=calendar_id)
         db.session.add(new_alias)
     db.session.commit()
-
-
 
 
 def parse_event_text(text: str, aliases: dict | None = None) -> tuple[str, str]:

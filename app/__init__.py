@@ -62,7 +62,6 @@ def create_app(test_config: dict | None = None) -> Flask:
     from app.settings import bp as settings_bp
     from app.auth import bp as auth_bp, google_bp
 
-
     app.register_blueprint(events_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(auth_bp)
