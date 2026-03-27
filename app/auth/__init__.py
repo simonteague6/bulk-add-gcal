@@ -20,6 +20,8 @@ google_bp = make_google_blueprint(
     ],
     storage=SQLAlchemyStorage(OAuth, db.session, user=current_user),
     redirect_url="/",  # Where to go after successful login
+    offline=True,           # Request refresh token
+    reprompt_consent=True,  # Force consent screen to get refresh token
 )
 
 # Flask-Dance's blueprint handles /login/google and /login/google/authorized
