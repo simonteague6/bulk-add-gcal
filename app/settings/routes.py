@@ -51,7 +51,7 @@ def settings():
             )
 
         if aliases:
-            alias_parser.save_aliases(aliases)
+            alias_parser.save_aliases(aliases, current_user.id)
             flash(f"Aliases saved successfully! ({len(aliases)} aliases)", "success")
 
         return redirect(url_for("settings.settings"))

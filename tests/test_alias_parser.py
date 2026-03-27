@@ -1,25 +1,18 @@
 import pytest
-import flask_login
 
 from app.services import alias_parser
 
 
 class TestLoadAliases:
-    def test_returns_user_aliases(self, app, user, user_aliases):
-        with app.test_request_context():
-            flask_login.login_user(user)
-            result = alias_parser.load_aliases()
-
+    def test_returns_user_aliases(self, user, user_aliases):
+        result = alias_parser.load_aliases(user.id)
         assert result == {"work": "work@example.com", "personal": "personal@example.com"}
 
-    def test_empty_when_no_aliases(self, app, user):
-        with app.test_request_context():
-            flask_login.login_user(user)
-            result = alias_parser.load_aliases()
-
+    def test_empty_when_no_aliases(self, user):
+        result = alias_parser.load_aliases(user.id)
         assert result == {}
 
-    def test_only_returns_current_user(self, app, user, second_user):
+    def test_only_returns_current_user(self, user, second_user):
         from app.models import db, CalendarAlias
 
         db.session.add(
@@ -34,44 +27,35 @@ class TestLoadAliases:
         )
         db.session.commit()
 
-        with app.test_request_context():
-            flask_login.login_user(user)
-            result = alias_parser.load_aliases()
-
+        result = alias_parser.load_aliases(user.id)
         assert result == {"mine": "mine@example.com"}
         assert "theirs" not in result
 
 
 class TestSaveAliases:
-    def test_creates_db_rows(self, app, user):
+    def test_creates_db_rows(self, user):
         from app.models import CalendarAlias
 
-        with app.test_request_context():
-            flask_login.login_user(user)
-            alias_parser.save_aliases({"work": "work@example.com"})
+        alias_parser.save_aliases({"work": "work@example.com"}, user.id)
 
         rows = CalendarAlias.query.filter_by(user_id=user.id).all()
         assert len(rows) == 1
         assert rows[0].alias == "work"
         assert rows[0].calendar_id == "work@example.com"
 
-    def test_replaces_existing(self, app, user, user_aliases):
+    def test_replaces_existing(self, user, user_aliases):
         from app.models import CalendarAlias
 
-        with app.test_request_context():
-            flask_login.login_user(user)
-            alias_parser.save_aliases({"new": "new@example.com"})
+        alias_parser.save_aliases({"new": "new@example.com"}, user.id)
 
         rows = CalendarAlias.query.filter_by(user_id=user.id).all()
         assert len(rows) == 1
         assert rows[0].alias == "new"
 
-    def test_empty_dict_clears(self, app, user, user_aliases):
+    def test_empty_dict_clears(self, user, user_aliases):
         from app.models import CalendarAlias
 
-        with app.test_request_context():
-            flask_login.login_user(user)
-            alias_parser.save_aliases({})
+        alias_parser.save_aliases({}, user.id)
 
         rows = CalendarAlias.query.filter_by(user_id=user.id).all()
         assert len(rows) == 0
@@ -170,16 +154,10 @@ class TestParseEventText:
 
 
 class TestGetAvailableAliases:
-    def test_returns_names(self, app, user, user_aliases):
-        with app.test_request_context():
-            flask_login.login_user(user)
-            result = alias_parser.get_available_aliases()
-
+    def test_returns_names(self, user, user_aliases):
+        result = alias_parser.get_available_aliases(user.id)
         assert set(result) == {"work", "personal"}
 
-    def test_empty(self, app, user):
-        with app.test_request_context():
-            flask_login.login_user(user)
-            result = alias_parser.get_available_aliases()
-
+    def test_empty(self, user):
+        result = alias_parser.get_available_aliases(user.id)
         assert result == []
