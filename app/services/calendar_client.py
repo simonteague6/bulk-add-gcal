@@ -23,7 +23,9 @@ def build_service_for_user(token: dict) -> object:
     if not isinstance(token, dict) or not token.get("access_token"):
         # This indicates the user is not properly authenticated and should
         # be redirected through the OAuth flow again by the caller.
-        raise ValueError("Missing or invalid OAuth token; user re-authentication required.")
+        raise ValueError(
+            "Missing or invalid OAuth token; user re-authentication required."
+        )
 
     # Validate that required Google OAuth client configuration is present.
     client_id = os.getenv("GOOGLE_CLIENT_ID")

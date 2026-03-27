@@ -20,13 +20,14 @@ google_bp = make_google_blueprint(
     ],
     storage=SQLAlchemyStorage(OAuth, db.session, user=current_user),
     redirect_url="/",  # Where to go after successful login
-    offline=True,           # Request refresh token
+    offline=True,  # Request refresh token
     reprompt_consent=True,  # Force consent screen to get refresh token
 )
 
 # Flask-Dance's blueprint handles /login/google and /login/google/authorized
 # We prefix it so the routes become /login/google and /login/google/authorized
 bp_prefix = "/login"
+
 
 @oauth_authorized.connect_via(google_bp)
 def google_logged_in(blueprint, token):
@@ -47,7 +48,10 @@ def google_logged_in(blueprint, token):
 
     # Ensure we have a valid email before querying/creating the user
     if not isinstance(email, str) or not email.strip():
-        flash("Your Google account did not provide an email address. Please try a different account.", "error")
+        flash(
+            "Your Google account did not provide an email address. Please try a different account.",
+            "error",
+        )
         return False
     # Find or create the user
     user = User.query.filter_by(email=email).first()
@@ -58,5 +62,6 @@ def google_logged_in(blueprint, token):
 
     # Log the user in (sets the session cookie)
     login_user(user)
+
 
 from app.auth import routes  # noqa: E402, F401

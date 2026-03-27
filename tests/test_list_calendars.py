@@ -1,5 +1,3 @@
-import pytest
-
 from app.services.list_calendars import list_calendars
 
 

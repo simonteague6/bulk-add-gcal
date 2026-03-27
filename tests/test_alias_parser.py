@@ -6,7 +6,10 @@ from app.services import alias_parser
 class TestLoadAliases:
     def test_returns_user_aliases(self, user, user_aliases):
         result = alias_parser.load_aliases(user.id)
-        assert result == {"work": "work@example.com", "personal": "personal@example.com"}
+        assert result == {
+            "work": "work@example.com",
+            "personal": "personal@example.com",
+        }
 
     def test_empty_when_no_aliases(self, user):
         result = alias_parser.load_aliases(user.id)

@@ -238,6 +238,7 @@ class TestSettingsRoutes:
 
         assert response.status_code == 200
 
+
 class TestAuthRoutes:
     def test_login_redirects_to_google(self, client):
         response = client.get("/login")
@@ -282,8 +283,13 @@ class TestUnauthenticatedAccess:
 
 class TestUserIsolation:
     def test_user_cannot_see_other_users_aliases(
-        self, app, user, second_user, user_aliases, mock_calendar_service,
-        sample_calendars
+        self,
+        app,
+        user,
+        second_user,
+        user_aliases,
+        mock_calendar_service,
+        sample_calendars,
     ):
         mock_calendar_list = mock_calendar_service.calendarList.return_value
         mock_calendar_list.list.return_value.execute.return_value = {
@@ -301,8 +307,14 @@ class TestUserIsolation:
         assert b'value="personal"' not in response.data
 
     def test_save_aliases_does_not_affect_other_user(
-        self, app, user, second_user, user_aliases, mock_calendar_service,
-        sample_calendars, mocker
+        self,
+        app,
+        user,
+        second_user,
+        user_aliases,
+        mock_calendar_service,
+        sample_calendars,
+        mocker,
     ):
         from app.models import CalendarAlias
 
