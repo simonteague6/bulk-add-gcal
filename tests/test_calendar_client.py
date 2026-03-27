@@ -1,8 +1,17 @@
+import os
+
 from app.services import calendar_client
 
 
 class TestBuildServiceForUser:
     def test_builds_credentials_from_token(self, mocker):
+        mocker.patch.dict(
+            os.environ,
+            {
+                "GOOGLE_CLIENT_ID": "test-client-id",
+                "GOOGLE_CLIENT_SECRET": "test-client-secret",
+            },
+        )
         mock_creds = mocker.MagicMock()
         mocker.patch(
             "app.services.calendar_client.Credentials", return_value=mock_creds
@@ -24,6 +33,13 @@ class TestBuildServiceForUser:
         assert result == mock_build.return_value
 
     def test_passes_refresh_token(self, mocker):
+        mocker.patch.dict(
+            os.environ,
+            {
+                "GOOGLE_CLIENT_ID": "test-client-id",
+                "GOOGLE_CLIENT_SECRET": "test-client-secret",
+            },
+        )
         mock_creds_cls = mocker.patch("app.services.calendar_client.Credentials")
         mocker.patch("app.services.calendar_client.build")
 
