@@ -30,6 +30,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     db_path = os.path.join(
         os.path.abspath(os.path.dirname(__file__)), "..", "data", "app.db"
     )
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 
     if test_config:
