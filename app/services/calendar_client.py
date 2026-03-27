@@ -19,12 +19,27 @@ def build_service_for_user(token: dict) -> object:
     Returns:
         Authenticated Google Calendar API v3 service object.
     """
+    # Validate token structure before attempting to build credentials.
+    if not isinstance(token, dict) or not token.get("access_token"):
+        # This indicates the user is not properly authenticated and should
+        # be redirected through the OAuth flow again by the caller.
+        raise ValueError("Missing or invalid OAuth token; user re-authentication required.")
+
+    # Validate that required Google OAuth client configuration is present.
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    if not client_id or not client_secret:
+        # This is a server-side configuration error rather than a user issue.
+        raise RuntimeError(
+            "Google OAuth client_id/client_secret not configured in environment."
+        )
+
     creds = Credentials(
         token=token["access_token"],
         refresh_token=token.get("refresh_token"),
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=os.getenv("GOOGLE_CLIENT_ID"),
-        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        client_id=client_id,
+        client_secret=client_secret,
         scopes=SCOPES,
     )
     return build("calendar", "v3", credentials=creds)
