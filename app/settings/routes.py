@@ -64,6 +64,12 @@ def settings():
 
     # Fetch the user's calendars from Google
     calendars = []
+    if not google.authorized:
+        flash(
+            "Your Google session is not active. Please re-authorize to manage calendar settings.",
+            "error",
+        )
+        return redirect(url_for("google.login"))
     try:
         service = calendar_client.build_service_for_user(google.token)
         calendars = list_calendars(service)
