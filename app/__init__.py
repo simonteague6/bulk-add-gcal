@@ -3,6 +3,7 @@
 import os
 
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 from app.models import db
 from flask_login import LoginManager
 
@@ -66,5 +67,9 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.register_blueprint(settings_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(google_bp, url_prefix="/login")
+
+    # Trust X-Forwarded-* headers from reverse proxy (e.g., Railway)
+    # This ensures OAuth redirects use HTTPS when accessed via a proxy
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     return app
