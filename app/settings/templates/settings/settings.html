@@ -1,242 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - Bulk Calendar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        linear: {
-                            bg: '#0f0f0f',
-                            surface: '#1c1c1c',
-                            border: '#2a2a2a',
-                            accent: '#8b5cf6',
-                            accentHover: '#7c3aed',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .glow {
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-        }
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            background: linear-accent;
-            color: white;
-            padding: 8px;
-            border-radius: 4px;
-            z-index: 100;
-        }
-        .skip-link:focus {
-            top: 10px;
-        }
-        .focus-visible\:ring-4:focus-visible {
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            --tw-ring-color: rgba(139, 92, 246, 0.5);
-            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-        }
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
-</head>
-<body class="bg-linear-bg min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6">
-    <a href="#main-content" class="skip-link focus:outline-none focus:ring-2 focus:ring-white">Skip to main content</a>
-    <div class="w-full max-w-2xl" id="main-content">
-        <!-- Main Card -->
-        <div class="bg-linear-surface border border-linear-border rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 glow" role="main">
+{% extends "base.html" %}
 
-            <!-- Header -->
-            <div class="mb-6 sm:mb-8 flex items-center justify-between">
-                <div>
-                    <h1 class="text-white text-xl sm:text-2xl font-semibold tracking-tight">Calendar Aliases</h1>
-                    <p class="text-gray-400 mt-1 text-xs sm:text-sm">Map short names to your calendars</p>
-                </div>
-                <a href="{{ url_for('events.index') }}" class="text-gray-400 hover:text-white transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </a>
-            </div>
+{% block title %}Settings — Bulk Calendar{% endblock %}
 
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="mb-4 p-4 rounded-xl {% if category == 'error' %}bg-red-900/50 border border-red-700 text-red-200{% else %}bg-green-900/50 border border-green-700 text-green-200{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <!-- Help Box -->
-            <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-[#141414] rounded-lg sm:rounded-xl border border-linear-border">
-                <h3 class="text-gray-300 text-xs sm:text-sm font-medium mb-1 sm:mb-2">How it works:</h3>
-                <ul class="text-gray-400 text-xs sm:text-sm space-y-0.5 sm:space-y-1">
-                    <li>• Type <code class="bg-linear-border px-1.5 py-0.5 rounded text-gray-200">@alias</code> before events</li>
-                    <li>• Example: <code class="bg-linear-border px-1.5 py-0.5 rounded text-gray-200">@workout Push day monday 7pm</code></li>
-                    <li>• Use <code class="bg-linear-border px-1.5 py-0.5 rounded text-gray-200">primary</code> for your main calendar</li>
-                </ul>
-            </div>
-
-            <!-- Form -->
-            <form action="{{ url_for('settings.settings') }}" method="POST" class="space-y-6" id="aliases-form">
-
-                <!-- Writable Calendars Section -->
-                <div>
-                    <h2 class="text-white text-xs sm:text-sm font-medium mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2">
-                        <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Your Calendars
-                    </h2>
-                    <div class="space-y-1 sm:space-y-2">
-                        {% for calendar in writable_calendars %}
-                        <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-[#141414] rounded-lg border border-linear-border min-h-[44px]">
-                            <!-- Status Badge -->
-                            {% if calendar.accessRole == 'owner' %}
-                                {% if calendar.get('primary') %}
-                                <span class="shrink-0 px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-300 rounded min-w-[52px] text-center">primary</span>
-                                {% else %}
-                                <span class="shrink-0 px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-300 rounded min-w-[52px] text-center">owner</span>
-                                {% endif %}
-                            {% else %}
-                            <span class="shrink-0 px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-300 rounded min-w-[52px] text-center">write</span>
-                            {% endif %}
-
-                            <!-- Calendar Name -->
-                            <span class="flex-1 text-gray-200 text-xs sm:text-sm truncate" title="{{ calendar.summary }}">
-                                {{ calendar.summary }}
-                            </span>
-
-                            <!-- Alias Input -->
-                            <input
-                                type="text"
-                                name="alias_for__{{ calendar.id }}"
-                                value="{{ alias_for_calendar.get(calendar.id, '') }}"
-                                placeholder="e.g. workout"
-                                class="w-20 sm:w-32 md:w-40 bg-linear-surface border border-linear-border rounded-lg px-2 sm:px-3 py-1.5 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-linear-accent text-xs sm:text-sm focus:ring-2 focus:ring-linear-accent focus:ring-opacity-50 min-h-[36px] focus-visible:ring-4"
-                                aria-label="Alias for {{ calendar.summary }}"
-                            >
-                        </div>
-                        {% endfor %}
-
-{% if not writable_calendars %}
-                         <p class="text-gray-500 text-xs sm:text-sm italic">No writable calendars found.</p>
-                         {% endif %}
-                    </div>
-                </div>
-
-                <!-- Read-Only Calendars Section -->
-                {% if readonly_calendars %}
-                <div>
-                    <button
-                        type="button"
-                        onclick="toggleReadonly()"
-                        class="w-full flex items-center justify-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 border border-linear-border hover:border-gray-500 text-gray-400 hover:text-gray-300 rounded-lg transition-colors text-xs sm:text-sm min-h-[44px] focus:outline-none focus:ring-2 focus:ring-linear-accent focus:ring-opacity-50"
-                    >
-                        <span id="readonly-toggle-text">Show read-only calendars ({{ readonly_calendars|length }})</span>
-                        <svg id="readonly-toggle-icon" class="w-3 h-3 sm:w-4 sm:h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-
-                    <div id="readonly-section" class="hidden mt-2 sm:mt-3 space-y-1 sm:space-y-2">
-                        {% for calendar in readonly_calendars %}
-                        <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-[#141414] rounded-lg border border-linear-border opacity-75 min-h-[44px]">
-                            <!-- Status Badge -->
-                            <span class="shrink-0 px-2 py-0.5 text-xs font-medium bg-gray-500/20 text-gray-400 rounded min-w-[52px] text-center">read only</span>
-
-                            <!-- Calendar Name -->
-                            <span class="flex-1 text-gray-400 text-xs sm:text-sm truncate" title="{{ calendar.summary }}">
-                                {{ calendar.summary }}
-                            </span>
-
-                            <!-- No alias input for read-only calendars -->
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Save Button -->
-                <button
-                    type="submit"
-                    class="w-full bg-linear-accent hover:bg-linear-accentHover text-white font-medium py-3 sm:py-3 px-4 sm:px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] min-h-[48px] focus:outline-none focus:ring-4 focus:ring-linear-accent focus:ring-opacity-50 text-sm sm:text-base"
-                >
-                    Save Aliases
-                </button>
-            </form>
-        </div>
+{% block content %}
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-[13px] font-medium text-vrc-text">Calendar Aliases</h1>
+        <a href="{{ url_for('events.index') }}"
+           class="w-8 h-8 flex items-center justify-center text-vrc-text-3
+                  hover:text-vrc-text border border-transparent hover:border-vrc-border
+                  rounded-md transition-colors focus-visible:outline-none
+                  focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2
+                  focus-visible:ring-offset-black"
+           aria-label="Back to Bulk Calendar">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 12H5M12 5l-7 7 7 7"></path>
+            </svg>
+        </a>
     </div>
 
-    <script>
-        function toggleReadonly() {
-            const section = document.getElementById('readonly-section');
-            const icon = document.getElementById('readonly-toggle-icon');
-            const text = document.getElementById('readonly-toggle-text');
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-6 space-y-2" role="status">
+            {% for category, message in messages %}
+            <div class="flex items-start gap-2.5 px-3 py-2.5 rounded-md border text-[12px] leading-snug
+                        {% if category == 'error' %}border-vrc-error/25 bg-vrc-error/5 text-[#ff8080]{% else %}border-vrc-success/25 bg-vrc-success/5 text-[#3dd68c]{% endif %}">
+                {% if category == 'error' %}
+                <svg class="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {% else %}
+                <svg class="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {% endif %}
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
 
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-                text.textContent = text.textContent.replace('Show', 'Hide');
-            } else {
-                section.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
-                text.textContent = text.textContent.replace('Hide', 'Show');
-            }
+    <!-- Info note -->
+    <p class="text-[12px] text-vrc-text-3 mb-6 leading-relaxed">
+        Prefix events with
+        <code class="font-mono text-vrc-text-2 bg-vrc-surface-2 border border-vrc-border px-1 rounded text-[11px]">@alias</code>
+        to route them to a specific calendar. Use
+        <code class="font-mono text-vrc-text-2 bg-vrc-surface-2 border border-vrc-border px-1 rounded text-[11px]">primary</code>
+        for your main calendar.
+    </p>
+
+    <!-- Form -->
+    <form action="{{ url_for('settings.settings') }}" method="POST" id="aliases-form">
+
+        <!-- Writable Calendars -->
+        <div class="mb-2">
+            <p class="text-[11px] font-medium uppercase tracking-widest text-vrc-text-3 mb-3">
+                Your Calendars
+            </p>
+            <div class="divide-y divide-vrc-border border-t border-vrc-border">
+                {% for calendar in writable_calendars %}
+                <div class="flex items-center gap-3 py-2.5 min-h-[44px]">
+                    <!-- Status badge -->
+                    <span class="shrink-0 font-mono text-[10px] px-1.5 py-0.5 rounded
+                                 border border-vrc-border bg-vrc-surface-2 text-vrc-text-3
+                                 min-w-[48px] text-center tracking-wider uppercase">
+                        {% if calendar.get('primary') %}primary
+                        {% elif calendar.accessRole == 'owner' %}owner
+                        {% else %}write{% endif %}
+                    </span>
+                    <!-- Calendar name -->
+                    <span class="flex-1 text-[13px] text-vrc-text-2 truncate min-w-0"
+                          title="{{ calendar.summary }}">
+                        {{ calendar.summary }}
+                    </span>
+                    <!-- Alias input -->
+                    <input
+                        type="text"
+                        name="alias_for__{{ calendar.id }}"
+                        value="{{ alias_for_calendar.get(calendar.id, '') }}"
+                        placeholder="alias"
+                        class="w-28 bg-vrc-surface-2 border border-vrc-border rounded
+                               px-2.5 py-1 text-[12px] font-mono text-vrc-text
+                               placeholder-vrc-text-3 focus:outline-none
+                               focus:border-vrc-border-hi transition-colors min-h-[36px]
+                               focus-visible:ring-2 focus-visible:ring-white
+                               focus-visible:ring-offset-1 focus-visible:ring-offset-black"
+                        aria-label="Alias for {{ calendar.summary }}"
+                    >
+                </div>
+                {% endfor %}
+                {% if not writable_calendars %}
+                <p class="text-[13px] text-vrc-text-3 italic py-3">No writable calendars found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Read-only Calendars -->
+        {% if readonly_calendars %}
+        <div class="mb-6">
+            <button
+                type="button"
+                onclick="toggleReadonly()"
+                class="w-full flex items-center justify-center gap-2 py-2 px-3
+                       border border-vrc-border hover:border-vrc-border-hi
+                       text-vrc-text-3 hover:text-vrc-text-2 rounded-md
+                       transition-colors text-[12px] min-h-[44px]
+                       focus-visible:outline-none focus-visible:ring-2
+                       focus-visible:ring-white focus-visible:ring-offset-2
+                       focus-visible:ring-offset-black mt-3"
+            >
+                <span id="readonly-toggle-text">Show read-only calendars ({{ readonly_calendars|length }})</span>
+                <svg id="readonly-toggle-icon" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="readonly-section" class="hidden mt-1 divide-y divide-vrc-border border-t border-vrc-border">
+                {% for calendar in readonly_calendars %}
+                <div class="flex items-center gap-3 py-2.5 min-h-[44px] opacity-50">
+                    <span class="shrink-0 font-mono text-[10px] px-1.5 py-0.5 rounded
+                                 border border-vrc-border bg-vrc-surface-2 text-vrc-text-3
+                                 min-w-[48px] text-center tracking-wider uppercase">
+                        read only
+                    </span>
+                    <span class="flex-1 text-[13px] text-vrc-text-3 truncate min-w-0"
+                          title="{{ calendar.summary }}">
+                        {{ calendar.summary }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Save -->
+        <button
+            type="submit"
+            class="w-full bg-white text-black text-[13px] font-medium
+                   py-2.5 rounded-md hover:bg-white/90 active:bg-white/80
+                   transition-colors min-h-[44px] focus-visible:outline-none
+                   focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2
+                   focus-visible:ring-offset-black">
+            Save Aliases
+        </button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleReadonly() {
+        var section = document.getElementById('readonly-section');
+        var icon    = document.getElementById('readonly-toggle-icon');
+        var text    = document.getElementById('readonly-toggle-text');
+        if (section.classList.contains('hidden')) {
+            section.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            text.textContent = text.textContent.replace('Show', 'Hide');
+        } else {
+            section.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+            text.textContent = text.textContent.replace('Hide', 'Show');
         }
-        
-        // Mobile enhancements for form inputs
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            // Increase font size for better readability on mobile
-            if (window.innerWidth < 768) {
-                input.style.fontSize = '16px'; // Prevents iOS zoom
-            }
+    }
+
+    // Mobile: prevent iOS zoom
+    if (window.innerWidth < 768) {
+        document.querySelectorAll('input[type="text"]').forEach(function (input) {
+            input.style.fontSize = '16px';
         });
-        
-        // Handle virtual keyboard appearance for inputs
-        let originalViewport = '';
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('focus', function() {
-                if ('ontouchstart' in window) {
-                    originalViewport = document.querySelector('meta[name="viewport"]').content;
-                    document.querySelector('meta[name="viewport"]').content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-                }
-            });
-            
-            input.addEventListener('blur', function() {
-                if ('ontouchstart' in window && originalViewport) {
-                    document.querySelector('meta[name="viewport"]').content = originalViewport;
-                }
-            });
-        });
-        
-        // Set minimum height for all interactive elements
-        document.querySelectorAll('button, a[href], input').forEach(el => {
-            if (el.tagName.toLowerCase() !== 'input' || el.type === 'submit' || el.type === 'button') {
-                el.style.minHeight = '44px';
-            }
-        });
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}
