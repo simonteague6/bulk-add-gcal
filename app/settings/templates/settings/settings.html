@@ -5,7 +5,7 @@
 {% block content %}
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
-        <span class="text-[13px] font-medium text-vrc-text">Calendar Aliases</span>
+        <h1 class="text-[13px] font-medium text-vrc-text">Calendar Aliases</h1>
         <a href="{{ url_for('events.index') }}"
            class="w-8 h-8 flex items-center justify-center text-vrc-text-3
                   hover:text-vrc-text border border-transparent hover:border-vrc-border
@@ -22,7 +22,7 @@
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <div class="mb-6 space-y-2" role="alert" aria-live="polite">
+        <div class="mb-6 space-y-2" role="status">
             {% for category, message in messages %}
             <div class="flex items-start gap-2.5 px-3 py-2.5 rounded-md border text-[12px] leading-snug
                         {% if category == 'error' %}border-vrc-error/25 bg-vrc-error/5 text-[#ff8080]{% else %}border-vrc-success/25 bg-vrc-success/5 text-[#3dd68c]{% endif %}">
@@ -170,22 +170,5 @@
             input.style.fontSize = '16px';
         });
     }
-
-    // Handle virtual keyboard
-    var originalViewport = '';
-    document.querySelectorAll('input[type="text"]').forEach(function (input) {
-        input.addEventListener('focus', function () {
-            if ('ontouchstart' in window) {
-                originalViewport = document.querySelector('meta[name="viewport"]').content;
-                document.querySelector('meta[name="viewport"]').content =
-                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-            }
-        });
-        input.addEventListener('blur', function () {
-            if ('ontouchstart' in window && originalViewport) {
-                document.querySelector('meta[name="viewport"]').content = originalViewport;
-            }
-        });
-    });
 </script>
 {% endblock %}
